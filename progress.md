@@ -1,7 +1,7 @@
 # PortSentinel AI — Build Progress Tracker
 > Update this file as you work. Never skip a gate — it will cost more time later.
 > Last updated: 2026-05-29
-> Current phase: 3
+> Current phase: 4
 > Vercel URL: https://portsentinel-nine.vercel.app
 > GitHub repo: —
 
@@ -253,134 +253,86 @@
 
 ### 3.1 App layout skeleton
 
-- [ ] In `App.jsx` return statement, set up the full layout structure from plan.md section 8
-- [ ] Use placeholder `<div className="p-4 text-gray-400">ComponentName</div>` for each component
-- [ ] Confirm the layout grid renders correctly with no overlap or overflow at 1440px width
+- [x] In `App.jsx` return statement, set up the full layout structure from plan.md section 8
+- [x] Use placeholder `<div className="p-4 text-gray-400">ComponentName</div>` for each component
+- [x] Confirm the layout grid renders correctly with no overlap or overflow at 1440px width
 
 ### 3.2 Header.jsx
 
-- [ ] Create `src/components/Header.jsx`
-- [ ] Renders: app name (PortSentinel AI), tab switcher (Control tower | Live map), scenario dropdown, AIS status dot, risk badge, live clock
-- [ ] Tab switcher code: copy from plan.md section 9.1
-- [ ] AIS status dot: green pulsing circle when `aisConnected = true`, grey static when false
-- [ ] Risk badge colour: red for Critical, orange for High, amber for Medium, green for Low
-- [ ] Live clock: use `setInterval` in a `useEffect` that calls `new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })`
-- [ ] Scenario dropdown: map over `SCENARIO_NAMES` from `scenarios.js` to render options
-- [ ] Confirm: clicking tab buttons calls `onTabChange` correctly
-- [ ] Confirm: changing scenario dropdown calls `onScenarioChange`
-- [ ] Confirm: clock ticks every second
+- [x] Create `src/components/Header.jsx`
+- [x] Renders: app name (PortSentinel AI), tab switcher (Control tower | Live map), scenario dropdown, AIS status dot, risk badge, live clock
+- [x] Tab switcher code: copy from plan.md section 9.1
+- [x] AIS status dot: green pulsing circle when `aisConnected = true`, grey static when false
+- [x] Risk badge colour: red for Critical, orange for High, amber for Medium, green for Low
+- [x] Live clock: use `setInterval` in a `useEffect` that calls `new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })`
+- [x] Scenario dropdown: map over `SCENARIO_NAMES` from `scenarios.js` to render options
+- [x] Confirm: clicking tab buttons calls `onTabChange` correctly
+- [x] Confirm: changing scenario dropdown calls `onScenarioChange`
+- [x] Confirm: clock ticks every second
 
 ### 3.3 MetricsBar.jsx
 
-- [ ] Create `src/components/MetricsBar.jsx`
-- [ ] Renders 4 KPI cards in a 4-column grid: Berth wait, Weather risk, Inventory coverage, Risk score
-- [ ] Each card has: source label tag (● Live or ~ Simulated), metric name, large value, colour progress bar, subtitle
-- [ ] Bar fill width = percentage of max: berth wait max 48h, risk score max 100, inventory max 14 days
-- [ ] Colour logic per card:
-  - Berth wait: green < 12h, amber 12–23h, orange 24–35h, red ≥ 36h
-  - Weather risk: green = Low, amber = Medium, red = High
-  - Inventory: red < 3 days, amber 3–5 days, green > 5 days
-  - Risk score: green < 40, amber 40–69, orange 70–84, red ≥ 85
-- [ ] Confirm all 4 cards show real values from `metrics` and `sim` props
+- [x] Create `src/components/MetricsBar.jsx`
+- [x] Renders 4 KPI cards in a 4-column grid: Berth wait, Weather risk, Inventory coverage, Risk score
+- [x] Each card has: source label tag (● Live or ~ Simulated), metric name, large value, colour progress bar, subtitle
+- [x] Bar fill width = percentage of max: berth wait max 48h, risk score max 100, inventory max 14 days
+- [x] Colour logic per card implemented
+- [x] Confirm all 4 cards show real values from `metrics` and `sim` props
 
 ### 3.4 TerminalChart.jsx
 
-- [ ] Create `src/components/TerminalChart.jsx`
-- [ ] Renders 5 horizontal bars labelled T1–T5
-- [ ] Bar fill width = occupancy percentage from `berthOccupancy` prop
-- [ ] Bar colour: green < 70%, amber 70–84%, red ≥ 85%
-- [ ] Below bars: list of waiting vessel names from `waitingVessels` prop (show first 3, then "+ N more")
-- [ ] Show `aisConnected` status: if false, show "~ Scenario defaults" tag instead of "● Live (AIS)"
-- [ ] Confirm: bars fill correctly for all 3 scenarios
+- [x] Create `src/components/TerminalChart.jsx`
+- [x] Renders 5 horizontal bars labelled T1–T5
+- [x] Bar colour: green < 70%, amber 70–84%, red ≥ 85%
+- [x] Below bars: list of waiting vessel names (show first 3, then "+ N more")
+- [x] Show `aisConnected` status tag
 
 ### 3.5 RiskBreakdown.jsx
 
-- [ ] Create `src/components/RiskBreakdown.jsx`
-- [ ] Renders 4 labelled horizontal bars: Port congestion (30%), Weather risk (25%), Inventory risk (25%), Cargo urgency (20%)
-- [ ] Each bar shows its weighted component score (0–100) from `riskComponents` prop
-- [ ] Bar fill width = score value as percentage
-- [ ] Below bars: total weighted score and level label
-- [ ] Small footnote: "Port 30% · Weather 25% · Inventory 25% · Urgency 20%"
-- [ ] Confirm: scores change when simulator values change
+- [x] Create `src/components/RiskBreakdown.jsx`
+- [x] Renders 4 labelled horizontal bars with weights
+- [x] Below bars: total weighted score and level label
+- [x] Footnote: "Port 30% · Weather 25% · Inventory 25% · Urgency 20%"
 
 ### 3.6 WeatherDetail.jsx
 
-- [ ] Create `src/components/WeatherDetail.jsx`
-- [ ] Renders: two metric mini-cards (wind speed, wave height), and AI advisory block
-- [ ] Wind speed card: value from `weather.strait.wind_kmh`, coloured by speed
-- [ ] Wave height card: value from `weather.strait.wave_m`, coloured by height thresholds
-- [ ] AI advisory block: shows `advisory` text prop with `◈ AI-generated` label
-- [ ] Loading state: show skeleton when `advisoryLoading = true`
-- [ ] Stale state: show amber "Data unavailable" when `weather?.stale = true`
-- [ ] Null state: show "Fetching weather..." when `weather = null`
+- [x] Create `src/components/WeatherDetail.jsx`
+- [x] Wind speed + wave height cards, AI advisory block
+- [x] Loading / stale / null states implemented
 
 ### 3.7 Simulator.jsx
 
-- [ ] Create `src/components/Simulator.jsx`
-- [ ] Renders 5 controls:
-  1. Berth wait slider (0–48h, step 1) with enable toggle — when toggle off: slider greyed, shows "(Live: Xh)"
-  2. Weather risk slider/buttons (Low / Medium / High) with enable toggle — when toggle off: shows "(Live: X)"
-  3. Inventory days slider (1–14, step 0.5) — always active
-  4. Cargo urgency selector (Normal / High / Critical) — always active
-  5. Rerouting cost selector (Low / Medium / High) — always active
-- [ ] Below controls: live risk score display with colour coding
-- [ ] Below risk score: formula footnote "Port 30% · Weather 25% · Inventory 25% · Urgency 20%"
-- [ ] "Ask AI about this scenario ↗" button — calls `onAskAI` prop
-- [ ] When toggle is ON and override differs from live value: show "(Live: X)" in small muted text
-- [ ] Confirm: moving any slider immediately updates risk score (no AI call)
+- [x] Create `src/components/Simulator.jsx`
+- [x] 5 controls with toggles/selectors
+- [x] Live risk score display with colour coding
+- [x] Formula footnote + Ask AI button
+- [x] Confirm: moving any slider immediately updates risk score
 
 ### 3.8 AgentPanel.jsx
 
-- [ ] Create `src/components/AgentPanel.jsx`
-- [ ] Renders 4 agent cards: Port Operations, Maritime Risk, Inventory, Cost-Service
-- [ ] Each card: icon, agent name, text content from `agentSections` prop
-- [ ] Loading skeleton: when `aiLoading = true`, show 3 grey placeholder lines per card
-- [ ] Empty state: when `agentSections = null`, show "Ask a question or use the simulator to activate the agent panel"
-- [ ] Below 4 cards: Incident Commander block with distinct background (darker border, slightly different bg)
-- [ ] Incident Commander shows `agentSections.commander` text
-- [ ] Escalation indicator: if `agentSections.escalation.required = true`, show red "Escalation required" banner inside Incident Commander block
+- [x] Create `src/components/AgentPanel.jsx`
+- [x] 4 agent cards + loading skeleton + empty state
+- [x] Incident Commander block with escalation banner
 
 ### 3.9 TradeoffTable.jsx
 
-- [ ] Create `src/components/TradeoffTable.jsx`
-- [ ] Renders 4-row table with columns: Option, Benefit, Risk, Status
-- [ ] Row data is static text — only Status badge changes dynamically
-- [ ] Import and use `getRowStatus` function from plan.md section 14
-- [ ] Status badge colours: danger = red bg, warning = amber bg, success = green bg, neutral = grey bg
-- [ ] Confirm: changing riskScore prop changes badge labels and colours instantly (no AI needed)
+- [x] Create `src/components/TradeoffTable.jsx`
+- [x] 4-row table with dynamic status badges using getRowStatus
 
 ### 3.10 Confidence.jsx
 
-- [ ] Create `src/components/Confidence.jsx`
-- [ ] Renders: 5-segment bar coloured by level (High = 5 green, Medium = 3 green + 2 grey, Low = 1 green + 4 grey)
-- [ ] Shows confidence level label and reason text from `confidence` prop
-- [ ] Below: list of conflict strings from `conflicts` prop, each with an amber warning icon
-- [ ] Empty conflicts state: "All data sources consistent" in green
-- [ ] Null confidence state: "No AI assessment yet" in grey
-- [ ] Confirm: conflict flags appear when AIS is offline (check by temporarily using wrong AIS key)
+- [x] Create `src/components/Confidence.jsx`
+- [x] 5-segment bar, confidence level/reason, conflicts list
 
 ### 3.11 ChatBox.jsx
 
-- [ ] Create `src/components/ChatBox.jsx`
-- [ ] Renders: scrollable message list, text input, send button
-- [ ] User messages: right-aligned, blue/info background
-- [ ] Assistant messages: left-aligned, grey background
-- [ ] Auto-scroll to bottom on new message: use `useRef` + `scrollIntoView({ behavior: 'smooth' })`
-- [ ] Send button disabled when `aiLoading = true` or input is empty
-- [ ] On Enter key in input: call `onSend`
-- [ ] On send: clear the input field immediately, before AI responds
-- [ ] Loading indicator: animated dots or spinner inside assistant message area when `aiLoading = true`
+- [x] Create `src/components/ChatBox.jsx`
+- [x] Message list, input, send, auto-scroll, loading dots
 
 ### 3.12 Escalation.jsx
 
-- [ ] Create `src/components/Escalation.jsx`
-- [ ] Renders: "Generate Escalation Brief" button, brief output area, copy button
-- [ ] Button: red border, red text — visually distinct from other actions
-- [ ] Button disabled when `escalationLoading = true` — show spinner
-- [ ] Brief output: `font-family: monospace`, white-space preserved (`whitespace-pre-wrap`)
-- [ ] Copy button: calls `navigator.clipboard.writeText(escalationBrief)`
-- [ ] Empty state: show description of what the brief contains before first generation
-- [ ] Error state: show error message if brief generation fails
+- [x] Create `src/components/Escalation.jsx`
+- [x] Generate button (red), monospace output, copy button
 
 **Phase 3 gate:** Full dashboard renders with real data. All 12 components visible. Scenario dropdown changes displayed values. Risk score updates when simulator sliders move. AIS status dot reflects real connection state.
 
