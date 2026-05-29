@@ -175,18 +175,25 @@ export default function MapView({ vessels, metrics, sim, aisConnected }) {
       }}>
         <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 8, fontWeight: 500 }}>Map legend</div>
         {[
-          ['Berthed vessel',       '#1D9E75'],
-          ['Waiting vessel',       '#BA7517'],
-          ['Transiting vessel',    '#888780'],
-          ['Tuas Mega Port',       '#1D9E75'],
-          ['Reference terminals',  '#9ca3af'],
-          ['Anchorage zone',       '#BA7517']
-        ].map(([label, colour]) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#374151', marginBottom: 4 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: colour, flexShrink: 0, opacity: 0.85 }} />
-            {label}
-          </div>
-        ))}
+          { label: 'Berthed vessel',      colour: '#1D9E75', shape: 'circle' },
+          { label: 'Waiting vessel',      colour: '#BA7517', shape: 'circle' },
+          { label: 'Transiting vessel',   colour: '#888780', shape: 'circle' },
+          { label: 'Tuas Mega Port',      colour: '#1D9E75', shape: 'square' },
+          { label: 'Reference terminals', colour: '#9ca3af', shape: 'square-dashed' },
+          { label: 'Anchorage zone',      colour: '#BA7517', shape: 'square-dashed' },
+        ].map(({ label, colour, shape }) => {
+          const base = { width: 10, height: 10, flexShrink: 0 }
+          const icon =
+            shape === 'circle'        ? { ...base, borderRadius: '50%', background: colour, opacity: 0.85 } :
+            shape === 'square'        ? { ...base, background: colour, opacity: 0.85, borderRadius: 2 } :
+            /* square-dashed */         { ...base, background: 'transparent', border: `1.5px dashed ${colour}`, borderRadius: 2 }
+          return (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#374151', marginBottom: 4 }}>
+              <div style={icon} />
+              {label}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
