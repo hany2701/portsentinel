@@ -17,6 +17,7 @@ import TradeoffTable from './components/TradeoffTable'
 import ChatBox from './components/ChatBox'
 import Confidence from './components/Confidence'
 import Escalation from './components/Escalation'
+import MapView from './components/MapView'
 
 export default function App() {
   const { vessels, connected: aisConnected } = useAISStream()
@@ -288,9 +289,12 @@ ACTIONS REQUIRED FROM DIRECTOR
           </div>
         </main>
       ) : (
-        <div className="flex items-center justify-center h-96">
-          <p className="text-gray-400 text-sm">Live map — coming in Phase 4</p>
-        </div>
+        <MapView
+          vessels={vessels}
+          metrics={metrics}
+          sim={sim}
+          aisConnected={aisConnected}
+        />
       )}
     </div>
   )
