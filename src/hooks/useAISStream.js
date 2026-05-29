@@ -29,21 +29,41 @@ export function useAISStream() {
         const mmsi = msg.MetaData?.MMSI
         if (!mmsi) return
 
+        // ShipStaticData — update destination + accurate typeCode for known vessels
+        const staticData = msg.Message?.ShipStaticData
+        if (staticData) {
+          if (vesselMap.current[mmsi]) {
+            vesselMap.current[mmsi] = {
+              ...vesselMap.current[mmsi],
+              typeCode:    staticData.TypeOfShipAndCargo ?? vesselMap.current[mmsi].typeCode,
+              destination: (staticData.Destination ?? '').trim().replace(/@/g, '').trim(),
+              updatedAt:   Date.now()
+            }
+            setVessels(Object.values(vesselMap.current))
+          }
+          return
+        }
+
+        // PositionReport — primary vessel update
         const pos = msg.Message?.PositionReport
         if (!pos) return
 
         const typeCode = vesselMap.current[mmsi]?.typeCode ?? 70
         if (!isCargoVessel(typeCode) && !vesselMap.current[mmsi]) return
 
-        const classification = classifyVessel(pos.Latitude, pos.Longitude, pos.Sog)
+        const classification = classifyVessel(
+          pos.Latitude, pos.Longitude, pos.Sog, pos.NavigationalStatus
+        )
 
         vesselMap.current[mmsi] = {
+          ...vesselMap.current[mmsi],  // preserve destination from ShipStaticData
           mmsi,
-          name: (msg.MetaData.ShipName ?? 'Unknown').trim(),
-          lat: pos.Latitude,
-          lon: pos.Longitude,
-          sog: pos.Sog,
-          heading: pos.TrueHeading,
+          name:      (msg.MetaData.ShipName ?? 'Unknown').trim(),
+          lat:       pos.Latitude,
+          lon:       pos.Longitude,
+          sog:       pos.Sog,
+          heading:   pos.TrueHeading,
+          navStatus: pos.NavigationalStatus,
           typeCode,
           ...classification,
           updatedAt: Date.now()
@@ -62,7 +82,7 @@ export function useAISStream() {
 
       ws.current.onclose = () => {
         setConnected(false)
-        setTimeout(connect, 5000) // reconnect after 5s
+        setTimeout(connect, 5000)
       }
 
       ws.current.onerror = () => ws.current.close()

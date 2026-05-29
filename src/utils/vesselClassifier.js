@@ -15,7 +15,7 @@ export const WAITING_ANCHORAGE = {
 
 export const BERTH_CAPACITY = { T1: 4, T2: 5, T3: 5, T4: 6, T5: 4 }
 
-export function classifyVessel(lat, lon, sog) {
+export function classifyVessel(lat, lon, sog, navStatus) {
   for (const [terminal, zone] of Object.entries(TERMINAL_ZONES)) {
     if (lat >= zone.latMin && lat <= zone.latMax &&
         lon >= zone.lonMin && lon <= zone.lonMax) {
@@ -27,7 +27,10 @@ export function classifyVessel(lat, lon, sog) {
   }
   if (lat >= WAITING_ANCHORAGE.latMin && lat <= WAITING_ANCHORAGE.latMax &&
       lon >= WAITING_ANCHORAGE.lonMin && lon <= WAITING_ANCHORAGE.lonMax) {
-    return { location: 'anchorage', status: 'waiting' }
+    // Only classify as waiting if actually stationary — not just passing through
+    // navStatus 1 = At Anchor, 5 = Moored
+    const isAnchored = sog < 1.0 || navStatus === 1 || navStatus === 5
+    if (isAnchored) return { location: 'anchorage', status: 'waiting' }
   }
   return { location: 'transit', status: 'transiting' }
 }

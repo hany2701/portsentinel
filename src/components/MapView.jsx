@@ -115,6 +115,7 @@ export default function MapView({ vessels, metrics, sim, aisConnected }) {
                 Speed: {v.sog.toFixed(1)} knots<br />
                 Heading: {heading}<br />
                 Location: {v.location}<br />
+                {v.destination ? <>Destination: {v.destination}<br /></> : null}
                 MMSI: {v.mmsi}<br />
                 Last seen: {lastSeen}
               </Popup>
