@@ -10,31 +10,50 @@ export default function WeatherDetail({ weather, advisory, advisoryLoading }) {
   if (weather.stale) {
     return (
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <div className="text-sm font-semibold text-amber-800 mb-1">Weather — Malacca Strait</div>
+        <div className="text-sm font-semibold text-amber-800 mb-1">Weather — Shipping Lanes</div>
         <p className="text-xs text-amber-700">Data unavailable — API unreachable, showing last known values</p>
       </div>
     )
   }
 
-  const windColor = weather.strait.wind_kmh > 62 ? 'text-red-600' : weather.strait.wind_kmh > 38 ? 'text-amber-500' : 'text-green-600'
-  const waveColor = weather.strait.wave_m > 3.0 ? 'text-red-600' : weather.strait.wave_m > 1.5 ? 'text-amber-500' : 'text-green-600'
+  function windColor(v) { return v > 62 ? 'text-red-600' : v > 38 ? 'text-amber-500' : 'text-green-600' }
+  function waveColor(v) { return v > 3.0 ? 'text-red-600' : v > 1.5 ? 'text-amber-500' : 'text-green-600' }
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-gray-800">Weather — Malacca Strait</span>
+        <span className="text-sm font-semibold text-gray-800">Weather — Shipping Lanes</span>
         <span className="text-xs text-gray-400">● Live</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-3">
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Wind speed</div>
-          <div className={`text-xl font-bold ${windColor}`}>{weather.strait.wind_kmh} km/h</div>
+      <div className="space-y-2 mb-3">
+        <div className="text-xs text-gray-500 font-medium">Malacca Strait</div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-gray-50 rounded-lg p-2.5">
+            <div className="text-xs text-gray-500 mb-1">Wind</div>
+            <div className={`text-lg font-bold ${windColor(weather.strait.wind_kmh)}`}>{weather.strait.wind_kmh} km/h</div>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-2.5">
+            <div className="text-xs text-gray-500 mb-1">Wave</div>
+            <div className={`text-lg font-bold ${waveColor(weather.strait.wave_m)}`}>{weather.strait.wave_m}m</div>
+          </div>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Wave height</div>
-          <div className={`text-xl font-bold ${waveColor}`}>{weather.strait.wave_m}m</div>
-        </div>
+
+        {weather.sgStrait && (
+          <>
+            <div className="text-xs text-gray-500 font-medium pt-1">Singapore Strait</div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-gray-50 rounded-lg p-2.5">
+                <div className="text-xs text-gray-500 mb-1">Wind</div>
+                <div className={`text-lg font-bold ${windColor(weather.sgStrait.wind_kmh)}`}>{weather.sgStrait.wind_kmh} km/h</div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-2.5">
+                <div className="text-xs text-gray-500 mb-1">Wave</div>
+                <div className={`text-lg font-bold ${waveColor(weather.sgStrait.wave_m)}`}>{weather.sgStrait.wave_m}m</div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">

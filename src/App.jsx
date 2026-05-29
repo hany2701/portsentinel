@@ -76,7 +76,12 @@ export default function App() {
         : { waitingCount: scenario.defaultWaitingCount, estimatedWaitHours: scenario.berthWait, waitingVessels: scenario.defaultWaitingVesselNames }
 
     const effectiveBerthWait = sim.berthWaitEnabled ? sim.berthWait : waitMetrics.estimatedWaitHours
-    const liveWeatherRisk = weather ? mapWeatherRisk(weather.strait.wind_kmh, weather.strait.wave_m) : 'Unknown'
+    const liveWeatherRisk = weather
+      ? mapWeatherRisk(
+          Math.max(weather.strait.wind_kmh, weather.sgStrait?.wind_kmh ?? 0),
+          Math.max(weather.strait.wave_m,   weather.sgStrait?.wave_m   ?? 0)
+        )
+      : 'Unknown'
     const effectiveWeatherRisk = sim.weatherRiskEnabled ? sim.weatherRisk : liveWeatherRisk
 
     const { total, level, portScore, weatherScore, invScore, urgencyScore } = calcRiskScore({

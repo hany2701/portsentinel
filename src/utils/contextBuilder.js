@@ -17,8 +17,9 @@ Scenario default berth wait: ${scenario.berthWait}h`
 
   const weatherBlock = weather && !weather.stale
     ? `Malacca Strait: wind ${weather.strait.wind_kmh} km/h, wave ${weather.strait.wave_m}m, swell ${weather.strait.swell_m}m
+Singapore Strait: wind ${weather.sgStrait?.wind_kmh ?? 'N/A'} km/h, wave ${weather.sgStrait?.wave_m ?? 'N/A'}m
 Singapore: wind ${weather.sg.wind_kmh} km/h, precipitation ${weather.sg.precipitation}mm
-Derived weather risk: ${metrics.liveWeatherRisk}`
+Derived weather risk (worst-case across straits): ${metrics.liveWeatherRisk}`
     : weather?.stale
     ? `STALE DATA — weather API unreachable. Last known: wind ${weather.strait.wind_kmh} km/h, wave ${weather.strait.wave_m}m`
     : 'Weather data unavailable — API unreachable'
