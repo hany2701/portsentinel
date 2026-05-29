@@ -23,8 +23,9 @@ export function useAISStream() {
         }))
       }
 
-      ws.current.onmessage = (event) => {
-        const msg = JSON.parse(event.data)
+      ws.current.onmessage = async (event) => {
+        const text = event.data instanceof Blob ? await event.data.text() : event.data
+        const msg = JSON.parse(text)
         const mmsi = msg.MetaData?.MMSI
         if (!mmsi) return
 
