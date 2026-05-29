@@ -61,27 +61,34 @@ export default function MapView({ vessels, metrics, sim, aisConnected }) {
         })}
 
         {/* Vessel dots */}
-        {vessels.map(v => (
-          <CircleMarker
-            key={v.mmsi}
-            center={[v.lat, v.lon]}
-            radius={v.status === 'berthed' ? 5 : v.status === 'waiting' ? 7 : 4}
-            pathOptions={{
-              color: STATUS_COLOURS[v.status] ?? '#888780',
-              fillColor: STATUS_COLOURS[v.status] ?? '#888780',
-              fillOpacity: 0.85,
-              weight: 1
-            }}
-          >
-            <Popup>
-              <strong>{v.name}</strong><br />
-              Status: <span style={{ textTransform: 'capitalize' }}>{v.status}</span><br />
-              Speed: {v.sog.toFixed(1)} knots<br />
-              Location: {v.location}<br />
-              MMSI: {v.mmsi}
-            </Popup>
-          </CircleMarker>
-        ))}
+        {vessels.map(v => {
+          const minsAgo = Math.round((Date.now() - v.updatedAt) / 60000)
+          const lastSeen = minsAgo < 1 ? 'just now' : `${minsAgo} min ago`
+          const heading = v.heading != null && v.heading !== 511 ? `${v.heading}°` : '—'
+          return (
+            <CircleMarker
+              key={v.mmsi}
+              center={[v.lat, v.lon]}
+              radius={v.status === 'berthed' ? 5 : v.status === 'waiting' ? 7 : 4}
+              pathOptions={{
+                color: STATUS_COLOURS[v.status] ?? '#888780',
+                fillColor: STATUS_COLOURS[v.status] ?? '#888780',
+                fillOpacity: 0.85,
+                weight: 1
+              }}
+            >
+              <Popup>
+                <strong>{v.name}</strong><br />
+                Status: <span style={{ textTransform: 'capitalize' }}>{v.status}</span><br />
+                Speed: {v.sog.toFixed(1)} knots<br />
+                Heading: {heading}<br />
+                Location: {v.location}<br />
+                MMSI: {v.mmsi}<br />
+                Last seen: {lastSeen}
+              </Popup>
+            </CircleMarker>
+          )
+        })}
       </MapContainer>
 
       {/* Floating stats overlay — top right */}

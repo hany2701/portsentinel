@@ -1,13 +1,13 @@
 export const TERMINAL_ZONES = {
-  T1: { latMin: 1.280, latMax: 1.298, lonMin: 103.580, lonMax: 103.618 },
-  T2: { latMin: 1.298, latMax: 1.315, lonMin: 103.600, lonMax: 103.638 },
-  T3: { latMin: 1.315, latMax: 1.330, lonMin: 103.620, lonMax: 103.655 },
-  T4: { latMin: 1.330, latMax: 1.348, lonMin: 103.638, lonMax: 103.672 },
-  T5: { latMin: 1.348, latMax: 1.365, lonMin: 103.655, lonMax: 103.690 }
+  T1: { latMin: 1.240, latMax: 1.268, lonMin: 103.585, lonMax: 103.622 },
+  T2: { latMin: 1.268, latMax: 1.292, lonMin: 103.600, lonMax: 103.640 },
+  T3: { latMin: 1.292, latMax: 1.315, lonMin: 103.618, lonMax: 103.658 },
+  T4: { latMin: 1.315, latMax: 1.338, lonMin: 103.636, lonMax: 103.672 },
+  T5: { latMin: 1.338, latMax: 1.358, lonMin: 103.652, lonMax: 103.688 }
 }
 
 export const WAITING_ANCHORAGE = {
-  latMin: 1.200, latMax: 1.280, lonMin: 103.450, lonMax: 103.580
+  latMin: 1.150, latMax: 1.245, lonMin: 103.450, lonMax: 103.590
 }
 
 export const BERTH_CAPACITY = { T1: 4, T2: 5, T3: 5, T4: 6, T5: 4 }
