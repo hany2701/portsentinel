@@ -4,7 +4,6 @@ import { mapWeatherRisk } from './utils/weatherMapper'
 
 export default function App() {
   const { vessels, connected } = useAISStream()
-  console.log('AIS vessels:', vessels.length, 'connected:', connected)
 
   const [weather, setWeather] = useState(null)
   const [news, setNews] = useState([])
@@ -38,8 +37,6 @@ export default function App() {
     const interval = setInterval(fetchNews, 30 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
-
-  console.log('weather:', weather, 'news:', news)
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">

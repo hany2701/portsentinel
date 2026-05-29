@@ -1,8 +1,8 @@
 # PortSentinel AI — Build Progress Tracker
 > Update this file as you work. Never skip a gate — it will cost more time later.
-> Last updated: —
-> Current phase: 0
-> Vercel URL: —
+> Last updated: 2026-05-29
+> Current phase: 2
+> Vercel URL: https://portsentinel-nine.vercel.app
 > GitHub repo: —
 
 ---
@@ -39,23 +39,23 @@
 
 ### 0.2 Project initialisation
 
-- [ ] `npm create vite@latest . -- --template react`  ← note the `.` to init in current folder
-- [ ] `npm install tailwindcss postcss autoprefixer`
-- [ ] `npx tailwindcss init -p`
-- [ ] `npm install recharts`
-- [ ] `npm install leaflet react-leaflet`
-- [ ] `npm install @anthropic-ai/sdk`
-- [ ] Confirm `package.json` has all five dependencies listed above
+- [x] `npm create vite@latest . -- --template react`  ← note the `.` to init in current folder
+- [x] `npm install tailwindcss postcss autoprefixer`
+- [x] `npx tailwindcss init -p`
+- [x] `npm install recharts`
+- [x] `npm install leaflet react-leaflet`
+- [x] `npm install @anthropic-ai/sdk`
+- [x] Confirm `package.json` has all five dependencies listed above
 
 ### 0.3 Config files
 
-- [ ] Replace contents of `src/index.css` with:
+- [x] Replace contents of `src/index.css` with:
   ```css
   @tailwind base;
   @tailwind components;
   @tailwind utilities;
   ```
-- [ ] Replace contents of `tailwind.config.js` with:
+- [x] Replace contents of `tailwind.config.js` with:
   ```js
   export default {
     content: ["./index.html", "./src/**/*.{js,jsx}"],
@@ -63,46 +63,46 @@
     plugins: []
   }
   ```
-- [ ] Create `vercel.json` in the project root (copy from plan.md section 4.4)
-- [ ] Create `.env.local` in the project root with all three API keys (copy from plan.md section 4.5)
-- [ ] Create `.gitignore` with these lines:
+- [x] Create `vercel.json` in the project root (copy from plan.md section 4.4)
+- [x] Create `.env.local` in the project root with all three API keys (copy from plan.md section 4.5)
+- [x] Create `.gitignore` with these lines:
   ```
   node_modules
   dist
   .env.local
   .env
   ```
-- [ ] Confirm `.gitignore` is working: `git status` must NOT show `.env.local`
+- [x] Confirm `.gitignore` is working: `git status` must NOT show `.env.local`
 
 ### 0.4 Leaflet CSS — critical step
 
-- [ ] Open `src/main.jsx`
-- [ ] Add `import 'leaflet/dist/leaflet.css'` as the FIRST import, before everything else
-- [ ] Final `main.jsx` should look exactly like plan.md section 4.1
+- [x] Open `src/main.jsx`
+- [x] Add `import 'leaflet/dist/leaflet.css'` as the FIRST import, before everything else
+- [x] Final `main.jsx` should look exactly like plan.md section 4.1
 
 ### 0.5 Vercel connection
 
-- [ ] `git add .`
-- [ ] `git commit -m "chore: project initialisation"`
-- [ ] `git push origin main`
-- [ ] Go to vercel.com → New Project → import your GitHub repo
-- [ ] In Vercel project settings → Environment Variables → add:
+- [x] `git add .`
+- [x] `git commit -m "chore: project initialisation"`
+- [x] `git push origin main`
+- [x] Go to vercel.com → New Project → import your GitHub repo
+- [x] In Vercel project settings → Environment Variables → add:
   - `VITE_AISSTREAM_KEY` = your AISStream key
   - `ANTHROPIC_API_KEY` = your Anthropic key
   - `CURRENTS_API_KEY` = your Currents API key
-- [ ] Trigger first deploy → confirm it succeeds (green checkmark)
-- [ ] Visit the Vercel URL → confirm the blank React app loads
+- [x] Trigger first deploy → confirm it succeeds (green checkmark)
+- [x] Visit the Vercel URL → confirm the blank React app loads
 
 ### 0.6 Serverless function smoke test
 
-- [ ] Create `api/chat.js` with ONLY a stub response — no real Anthropic call yet:
+- [x] Create `api/chat.js` with ONLY a stub response — no real Anthropic call yet:
   ```js
   export default async function handler(req, res) {
     res.json({ content: 'stub response — API route working' })
   }
   ```
-- [ ] Push to GitHub → Vercel auto-deploys
-- [ ] Open browser console on the Vercel URL and run:
+- [x] Push to GitHub → Vercel auto-deploys
+- [x] Open browser console on the Vercel URL and run:
   ```js
   fetch('/api/chat', {
     method: 'POST',
@@ -110,7 +110,7 @@
     body: JSON.stringify({ messages: [], context: 'test' })
   }).then(r => r.json()).then(console.log)
   ```
-- [ ] Confirm you see `{ content: 'stub response — API route working' }` in the console
+- [x] Confirm you see `{ content: 'stub response — API route working' }` in the console
 - [ ] If you see a CORS error: check `vercel.json` headers are correct and redeploy
 
 **Phase 0 gate:** Vercel URL loads blank app. `/api/chat` returns stub response. No errors in console. `.env.local` is NOT in git.
@@ -125,54 +125,54 @@
 
 ### 1.1 Vessel classifier utilities
 
-- [ ] Create `src/utils/vesselClassifier.js` — copy the complete file from plan.md section 5.3
-- [ ] Confirm the file exports: `TERMINAL_ZONES`, `WAITING_ANCHORAGE`, `BERTH_CAPACITY`, `classifyVessel`, `isCargoVessel`, `calcBerthOccupancy`, `calcWaitMetrics`
+- [x] Create `src/utils/vesselClassifier.js` — copy the complete file from plan.md section 5.3
+- [x] Confirm the file exports: `TERMINAL_ZONES`, `WAITING_ANCHORAGE`, `BERTH_CAPACITY`, `classifyVessel`, `isCargoVessel`, `calcBerthOccupancy`, `calcWaitMetrics`
 
 ### 1.2 AIS WebSocket hook
 
-- [ ] Create `src/hooks/useAISStream.js` — copy the complete file from plan.md section 5.4
-- [ ] In `src/App.jsx`, add at the top of the component:
+- [x] Create `src/hooks/useAISStream.js` — copy the complete file from plan.md section 5.4
+- [x] In `src/App.jsx`, add at the top of the component:
   ```jsx
   import { useAISStream } from './hooks/useAISStream'
   const { vessels, connected } = useAISStream()
   console.log('AIS vessels:', vessels.length, 'connected:', connected)
   ```
-- [ ] `npm run dev` and open localhost
-- [ ] Wait 30–60 seconds — watch the console for vessel objects appearing
-- [ ] Confirm vessel objects have these fields: `mmsi`, `name`, `lat`, `lon`, `sog`, `location`, `status`
-- [ ] Confirm `status` values are one of: `berthed`, `waiting`, `manoeuvring`, `transiting`
-- [ ] If `connected` stays `false`: check your `VITE_AISSTREAM_KEY` in `.env.local`
-- [ ] If all vessels show `status: 'transiting'`: your zone boundaries may need widening — expand each zone by 0.005 degrees in all directions in `TERMINAL_ZONES`
-- [ ] If fewer than 3 vessels appear after 2 minutes: the bounding box is correct but traffic is low — this is expected for Tuas during off-peak hours, scenario defaults will cover it
-- [ ] Remove the `console.log` line from App.jsx after confirming
+- [x] `npm run dev` and open localhost
+- [x] Wait 30–60 seconds — watch the console for vessel objects appearing
+- [x] Confirm vessel objects have these fields: `mmsi`, `name`, `lat`, `lon`, `sog`, `location`, `status`
+- [x] Confirm `status` values are one of: `berthed`, `waiting`, `manoeuvring`, `transiting`
+- [x] If `connected` stays `false`: check your `VITE_AISSTREAM_KEY` in `.env.local`
+- [x] If all vessels show `status: 'transiting'`: your zone boundaries may need widening — expand each zone by 0.005 degrees in all directions in `TERMINAL_ZONES`
+- [x] If fewer than 3 vessels appear after 2 minutes: the bounding box is correct but traffic is low — this is expected for Tuas during off-peak hours, scenario defaults will cover it
+- [x] Remove the `console.log` line from App.jsx after confirming
 
 ### 1.3 Weather mapper utility
 
-- [ ] Create `src/utils/weatherMapper.js` — copy from plan.md section 5.6
-- [ ] Test it manually in browser console (after importing): `mapWeatherRisk(47, 2.1)` → should return `'Medium'`
-- [ ] Test edge cases: `mapWeatherRisk(70, 4.0)` → `'High'`, `mapWeatherRisk(10, 0.5)` → `'Low'`
+- [x] Create `src/utils/weatherMapper.js` — copy from plan.md section 5.6
+- [x] Test it manually in browser console (after importing): `mapWeatherRisk(47, 2.1)` → should return `'Medium'`
+- [x] Test edge cases: `mapWeatherRisk(70, 4.0)` → `'High'`, `mapWeatherRisk(10, 0.5)` → `'Low'`
 
 ### 1.4 Weather API route
 
-- [ ] Create `api/weather.js` — copy the complete file from plan.md section 12.2
-- [ ] Push to GitHub and wait for Vercel deploy
-- [ ] Test by visiting `YOUR_VERCEL_URL/api/weather` in the browser
-- [ ] Confirm response has: `strait.wind_kmh`, `strait.wave_m`, `strait.swell_m`, `sg.wind_kmh`, `stale: false`
-- [ ] If either fetch fails: check Open-Meteo API URLs are correct, they are public and require no key
+- [x] Create `api/weather.js` — copy the complete file from plan.md section 12.2
+- [x] Push to GitHub and wait for Vercel deploy
+- [x] Test by visiting `YOUR_VERCEL_URL/api/weather` in the browser
+- [x] Confirm response has: `strait.wind_kmh`, `strait.wave_m`, `strait.swell_m`, `sg.wind_kmh`, `stale: false`
+- [x] If either fetch fails: check Open-Meteo API URLs are correct, they are public and require no key
 
 ### 1.5 News API route
 
-- [ ] Create `api/news.js` — copy the complete file from plan.md section 12.3
-- [ ] Confirm `CURRENTS_API_KEY` is set in Vercel environment variables
-- [ ] Push and test `YOUR_VERCEL_URL/api/news`
-- [ ] Confirm `articles` array is returned (may be empty if no relevant results — that is fine)
-- [ ] If 401 error: API key is missing or wrong in Vercel env vars
+- [x] Create `api/news.js` — copy the complete file from plan.md section 12.3
+- [x] Confirm `CURRENTS_API_KEY` is set in Vercel environment variables
+- [x] Push and test `YOUR_VERCEL_URL/api/news`
+- [x] Confirm `articles` array is returned (may be empty if no relevant results — that is fine)
+- [x] If 401 error: API key is missing or wrong in Vercel env vars
 
 ### 1.6 Advisory API route
 
-- [ ] Create `api/advisory.js` — copy the complete file from plan.md section 12.4
-- [ ] Push to GitHub
-- [ ] Test with a POST request from browser console:
+- [x] Create `api/advisory.js` — copy the complete file from plan.md section 12.4
+- [x] Push to GitHub
+- [x] Test with a POST request from browser console:
   ```js
   fetch('/api/advisory', {
     method: 'POST',
@@ -180,16 +180,16 @@
     body: JSON.stringify({ wind_kmh: 47, wave_m: 2.1, swell_m: 1.8, sg_wind_kmh: 22 })
   }).then(r => r.json()).then(console.log)
   ```
-- [ ] Confirm you receive `{ advisory: "Two sentence maritime advisory..." }`
+- [x] Confirm you receive `{ advisory: "Two sentence maritime advisory..." }`
 
 ### 1.7 Wire weather and news fetches in App.jsx
 
-- [ ] Add `weather` state and `news` state to App.jsx (see plan.md section 7.1)
-- [ ] Add the weather fetch useEffect from plan.md section 7.4
-- [ ] Add the news fetch useEffect from plan.md section 7.5
-- [ ] Add temporary `console.log(weather, news)` to confirm both arrive
-- [ ] Confirm in console: weather object has real numbers, news has articles
-- [ ] Remove console.log after confirming
+- [x] Add `weather` state and `news` state to App.jsx (see plan.md section 7.1)
+- [x] Add the weather fetch useEffect from plan.md section 7.4
+- [x] Add the news fetch useEffect from plan.md section 7.5
+- [x] Add temporary `console.log(weather, news)` to confirm both arrive
+- [x] Confirm in console: weather object has real numbers, news has articles
+- [x] Remove console.log after confirming
 
 **Phase 1 gate:** AIS vessels populate within 60 seconds. `/api/weather` returns real numbers. `/api/news` returns without error. `/api/advisory` returns two-sentence text. All confirmed via console or direct URL test.
 

@@ -21,10 +21,6 @@ Current data: Malacca Strait wind ${wind_kmh} km/h, wave height ${wave_m}m, swel
     })
     res.json({ advisory: response.content[0].text })
   } catch (err) {
-    res.status(500).json({
-      error: err.message,
-      status: err.status,
-      body: err.error ?? null
-    })
+    res.status(500).json({ error: err.message })
   }
 }
