@@ -106,7 +106,7 @@ export default function App() {
   // Scenario change reset
   useEffect(() => {
     const scenario = SCENARIOS[activeScenario]
-    setSim({ berthWaitEnabled: false, berthWait: scenario.berthWait, weatherRiskEnabled: false, weatherRisk: 'Low', inventoryDays: scenario.inventoryDays, cargoUrgency: scenario.cargoUrgency, rerouteCost: scenario.rerouteCost })
+    setSim({ berthWaitEnabled: false, berthWait: scenario.berthWait, weatherRiskEnabled: !scenario.liveMode, weatherRisk: scenario.weatherRisk ?? 'Low', inventoryDays: scenario.inventoryDays, cargoUrgency: scenario.cargoUrgency, rerouteCost: scenario.rerouteCost })
     setEscalationBrief(null)
     setAgentSections(null)
     setChatHistory([])
