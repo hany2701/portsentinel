@@ -227,11 +227,26 @@ ACTIONS REQUIRED FROM DIRECTOR
   }
 
   const isLiveMode = SCENARIOS[activeScenario]?.liveMode === true
+
   const occupancySourceLabel = isLiveMode
     ? (aisConnected ? '● Live (AIS)' : '⚠ AIS offline')
     : aisConnected && vessels.filter(v => v.status === 'berthed').length > 3
       ? '● Live (AIS)'
       : '~ Scenario defaults'
+
+  const berthWaitLabel = sim.berthWaitEnabled
+    ? '~ Simulated'
+    : isLiveMode
+      ? (aisConnected ? '● Live (AIS)' : '⚠ AIS offline')
+      : aisConnected && vessels.length > 0
+        ? '● Live (AIS)'
+        : '~ Scenario defaults'
+
+  const weatherLabel = sim.weatherRiskEnabled
+    ? '~ Simulated'
+    : weather
+      ? '● Live'
+      : '— Unavailable'
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -247,7 +262,13 @@ ACTIONS REQUIRED FROM DIRECTOR
 
       {activeTab === 'dashboard' ? (
         <main className="p-4 space-y-4">
-          <MetricsBar metrics={metrics} sim={sim} weather={weather} />
+          <MetricsBar
+            metrics={metrics}
+            sim={sim}
+            weather={weather}
+            berthWaitLabel={berthWaitLabel}
+            weatherLabel={weatherLabel}
+          />
 
           <div className="grid grid-cols-3 gap-4">
             <TerminalChart

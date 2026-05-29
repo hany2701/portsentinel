@@ -19,14 +19,14 @@ function riskColor(s) {
   return 'bg-green-500'
 }
 
-export default function MetricsBar({ metrics, sim, weather }) {
+export default function MetricsBar({ metrics, sim, weather, berthWaitLabel, weatherLabel }) {
   const wrisk = metrics.effectiveWeatherRisk
   const wriskPct = wrisk === 'High' ? 100 : wrisk === 'Medium' ? 55 : 20
 
   const cards = [
     {
       label: 'Berth wait',
-      source: '● Live (AIS)',
+      source: berthWaitLabel ?? '● Live (AIS)',
       value: `${metrics.effectiveBerthWait}h`,
       barPct: Math.min(100, Math.round((metrics.effectiveBerthWait / 48) * 100)),
       barClass: berthColor(metrics.effectiveBerthWait),
@@ -34,7 +34,7 @@ export default function MetricsBar({ metrics, sim, weather }) {
     },
     {
       label: 'Weather risk',
-      source: weather ? '● Live' : '— Unavailable',
+      source: weatherLabel ?? (weather ? '● Live' : '— Unavailable'),
       value: wrisk,
       barPct: wriskPct,
       barClass: weatherColor(wrisk),
