@@ -4,7 +4,7 @@ function barColor(pct) {
   return 'bg-green-500'
 }
 
-export default function TerminalChart({ berthOccupancy, waitingVessels, waitingCount, aisConnected }) {
+export default function TerminalChart({ berthOccupancy, waitingVessels, waitingCount, aisConnected, sourceLabel }) {
   const shown = waitingVessels.slice(0, 3)
   const extra = waitingCount - shown.length
 
@@ -12,7 +12,7 @@ export default function TerminalChart({ berthOccupancy, waitingVessels, waitingC
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-semibold text-gray-800">Terminal occupancy</span>
-        <span className="text-xs text-gray-400">{aisConnected ? '● Live (AIS)' : '~ Scenario defaults'}</span>
+        <span className="text-xs text-gray-400">{sourceLabel ?? (aisConnected ? '● Live (AIS)' : '~ Scenario defaults')}</span>
       </div>
 
       <div className="space-y-2.5">

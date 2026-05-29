@@ -1,4 +1,19 @@
 export const SCENARIOS = {
+  'Live Data': {
+    liveMode: true,
+    berthWait: 0,
+    inventoryDays: 7,
+    cargoUrgency: 'Normal',
+    rerouteCost: 'Low',
+    cargoType: 'Live AIS feed — no scenario active',
+    vesselName: 'N/A',
+    origin: 'N/A',
+    alternatePort: 'N/A',
+    defaultBerthOccupancy: { T1: 0, T2: 0, T3: 0, T4: 0, T5: 0 },
+    defaultWaitingCount: 0,
+    defaultWaitingVesselNames: [],
+    conflictFlag: null
+  },
   'Typhoon Yagi': {
     berthWait: 28,
     inventoryDays: 2.3,

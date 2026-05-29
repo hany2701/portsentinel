@@ -24,16 +24,16 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [weather, setWeather] = useState(null)
   const [news, setNews] = useState([])
-  const [activeScenario, setActiveScenario] = useState('Typhoon Yagi')
+  const [activeScenario, setActiveScenario] = useState('Live Data')
 
   const [sim, setSim] = useState({
     berthWaitEnabled:   false,
-    berthWait:          28,
+    berthWait:          0,
     weatherRiskEnabled: false,
     weatherRisk:        'Low',
-    inventoryDays:      2.3,
-    cargoUrgency:       'Critical',
-    rerouteCost:        'Medium'
+    inventoryDays:      7,
+    cargoUrgency:       'Normal',
+    rerouteCost:        'Low'
   })
 
   const [metrics, setMetrics] = useState({
@@ -61,13 +61,17 @@ export default function App() {
   // Central derived metrics
   useEffect(() => {
     const scenario = SCENARIOS[activeScenario]
+    const isLiveMode = scenario.liveMode === true
+
     const berthOccupancy =
-      aisConnected && vessels.filter(v => v.status === 'berthed').length > 3
+      isLiveMode
         ? calcBerthOccupancy(vessels)
-        : scenario.defaultBerthOccupancy
+        : aisConnected && vessels.filter(v => v.status === 'berthed').length > 3
+          ? calcBerthOccupancy(vessels)
+          : scenario.defaultBerthOccupancy
 
     const waitMetrics =
-      aisConnected && vessels.length > 0
+      isLiveMode || (aisConnected && vessels.length > 0)
         ? calcWaitMetrics(vessels)
         : { waitingCount: scenario.defaultWaitingCount, estimatedWaitHours: scenario.berthWait, waitingVessels: scenario.defaultWaitingVesselNames }
 
@@ -222,6 +226,13 @@ ACTIONS REQUIRED FROM DIRECTOR
     finally { setAdvisoryLoading(false) }
   }
 
+  const isLiveMode = SCENARIOS[activeScenario]?.liveMode === true
+  const occupancySourceLabel = isLiveMode
+    ? (aisConnected ? '● Live (AIS)' : '⚠ AIS offline')
+    : aisConnected && vessels.filter(v => v.status === 'berthed').length > 3
+      ? '● Live (AIS)'
+      : '~ Scenario defaults'
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header
@@ -244,6 +255,7 @@ ACTIONS REQUIRED FROM DIRECTOR
               waitingVessels={metrics.waitingVessels}
               waitingCount={metrics.waitingCount}
               aisConnected={aisConnected}
+              sourceLabel={occupancySourceLabel}
             />
             <RiskBreakdown
               riskComponents={metrics.riskComponents}
