@@ -71,7 +71,7 @@ export default function App() {
           : scenario.defaultBerthOccupancy
 
     const waitMetrics =
-      isLiveMode || (aisConnected && vessels.length > 0)
+      isLiveMode
         ? calcWaitMetrics(vessels)
         : { waitingCount: scenario.defaultWaitingCount, estimatedWaitHours: scenario.berthWait, waitingVessels: scenario.defaultWaitingVesselNames }
 
@@ -82,7 +82,8 @@ export default function App() {
           Math.max(weather.strait.wave_m,   weather.sgStrait?.wave_m   ?? 0)
         )
       : 'Unknown'
-    const effectiveWeatherRisk = sim.weatherRiskEnabled ? sim.weatherRisk : liveWeatherRisk
+    const scenarioWeatherRisk = isLiveMode ? liveWeatherRisk : (scenario.weatherRisk ?? liveWeatherRisk)
+    const effectiveWeatherRisk = sim.weatherRiskEnabled ? sim.weatherRisk : scenarioWeatherRisk
 
     const { total, level, portScore, weatherScore, invScore, urgencyScore } = calcRiskScore({
       berthWait: effectiveBerthWait, weatherRisk: effectiveWeatherRisk,
@@ -106,7 +107,7 @@ export default function App() {
   // Scenario change reset
   useEffect(() => {
     const scenario = SCENARIOS[activeScenario]
-    setSim({ berthWaitEnabled: false, berthWait: scenario.berthWait, weatherRiskEnabled: !scenario.liveMode, weatherRisk: scenario.weatherRisk ?? 'Low', inventoryDays: scenario.inventoryDays, cargoUrgency: scenario.cargoUrgency, rerouteCost: scenario.rerouteCost })
+    setSim({ berthWaitEnabled: false, berthWait: scenario.berthWait, weatherRiskEnabled: false, weatherRisk: scenario.weatherRisk ?? 'Low', inventoryDays: scenario.inventoryDays, cargoUrgency: scenario.cargoUrgency, rerouteCost: scenario.rerouteCost })
     setEscalationBrief(null)
     setAgentSections(null)
     setChatHistory([])
@@ -243,15 +244,13 @@ ACTIONS REQUIRED FROM DIRECTOR
     ? '~ Simulated'
     : isLiveMode
       ? (aisConnected ? '● Live (AIS)' : '⚠ AIS offline')
-      : aisConnected && vessels.length > 0
-        ? '● Live (AIS)'
-        : '~ Scenario defaults'
+      : '~ Scenario defaults'
 
   const weatherLabel = sim.weatherRiskEnabled
     ? '~ Simulated'
-    : weather
-      ? '● Live'
-      : '— Unavailable'
+    : isLiveMode
+      ? (weather ? '● Live' : '— Unavailable')
+      : '~ Scenario defaults'
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -288,7 +287,13 @@ ACTIONS REQUIRED FROM DIRECTOR
               riskScore={metrics.riskScore}
               riskLevel={metrics.riskLevel}
             />
-            <WeatherDetail weather={weather} advisory={advisory} advisoryLoading={advisoryLoading} />
+            <WeatherDetail
+              weather={weather}
+              isLiveMode={isLiveMode}
+              scenarioWeather={isLiveMode ? null : SCENARIOS[activeScenario].scenarioWeather}
+              advisory={advisory}
+              advisoryLoading={advisoryLoading}
+            />
           </div>
 
           <div className="grid grid-cols-3 gap-4">

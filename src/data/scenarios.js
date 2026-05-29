@@ -20,6 +20,10 @@ export const SCENARIOS = {
     cargoUrgency: 'Critical',
     rerouteCost: 'Medium',
     weatherRisk: 'High',
+    scenarioWeather: {
+      strait:   { wind_kmh: 95, wave_m: 4.5 },
+      sgStrait: { wind_kmh: 88, wave_m: 3.8 }
+    },
     cargoType: 'Critical electronics components',
     vesselName: 'MV Sealink Proteus',
     origin: 'Rotterdam',
@@ -35,6 +39,10 @@ export const SCENARIOS = {
     cargoUrgency: 'High',
     rerouteCost: 'Low',
     weatherRisk: 'Low',
+    scenarioWeather: {
+      strait:   { wind_kmh: 18, wave_m: 0.8 },
+      sgStrait: { wind_kmh: 14, wave_m: 0.5 }
+    },
     cargoType: 'Consumer electronics',
     vesselName: 'MV Horizon Star',
     origin: 'Shenzhen',
@@ -50,6 +58,10 @@ export const SCENARIOS = {
     cargoUrgency: 'Normal',
     rerouteCost: 'Low',
     weatherRisk: 'Low',
+    scenarioWeather: {
+      strait:   { wind_kmh: 22, wave_m: 1.0 },
+      sgStrait: { wind_kmh: 18, wave_m: 0.7 }
+    },
     cargoType: 'Industrial machinery parts',
     vesselName: 'MV Baltic Trader',
     origin: 'Rotterdam',
