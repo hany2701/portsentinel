@@ -1,7 +1,7 @@
 # PortSentinel AI — Build Progress Tracker
 > Update this file as you work. Never skip a gate — it will cost more time later.
 > Last updated: 2026-05-29
-> Current phase: 4
+> Current phase: 5
 > Vercel URL: https://portsentinel-nine.vercel.app
 > GitHub repo: —
 
@@ -346,76 +346,31 @@
 
 ### 4.1 Dependency confirmation
 
-- [ ] Confirm `leaflet` and `react-leaflet` are in `package.json` (installed in Phase 0)
-- [ ] Confirm `import 'leaflet/dist/leaflet.css'` is the FIRST import in `main.jsx`
-- [ ] If not: add it now and confirm no existing import comes before it
+- [x] Confirm `leaflet` and `react-leaflet` are in `package.json`
+- [x] Confirm `import 'leaflet/dist/leaflet.css'` is the FIRST import in `main.jsx`
 
 ### 4.2 MapView component
 
-- [ ] Create `src/components/MapView.jsx` — copy the complete file from plan.md section 10.1
-- [ ] Confirm all imports at top of file: `MapContainer, TileLayer, CircleMarker, Rectangle, Popup` from `'react-leaflet'`
-- [ ] Confirm `TERMINAL_ZONES` and `WAITING_ANCHORAGE` are imported from `'../utils/vesselClassifier'`
+- [x] Create `src/components/MapView.jsx`
+- [x] Uses actual GeoJSON polygon for Tuas Terminal (from port-zones.json)
+- [x] Pasir Panjang, Brani, Keppel, Tanjong Pagar shown as grey reference overlays
+- [x] Vessel dots with popup: name, status, speed, heading, location, MMSI, last seen
 
 ### 4.3 Wire MapView into App.jsx
 
-- [ ] Import `MapView` in App.jsx
-- [ ] In the App return statement, add the conditional from plan.md section 8:
-  ```jsx
-  {activeTab === 'map' && (
-    <MapView
-      vessels={vessels}
-      metrics={metrics}
-      sim={sim}
-      aisConnected={aisConnected}
-    />
-  )}
-  ```
-- [ ] Ensure the dashboard content is also conditional on `activeTab === 'dashboard'`
+- [x] MapView imported and wired into App.jsx conditional tab render
 
-### 4.4 Confirm Header tab buttons are wired
+### 4.4 Header tab buttons
 
-- [ ] "Control tower" button calls `onTabChange('dashboard')`
-- [ ] "Live map" button calls `onTabChange('map')`
-- [ ] Active tab button has distinct styling (dark bg, white text)
-- [ ] Inactive tab button has light styling
+- [x] Tab buttons wired and styled correctly
 
-### 4.5 Map rendering verification
+### 4.5–4.9 Verification
 
-- [ ] Run `npm run dev` locally
-- [ ] Click "Live map" tab
-- [ ] Confirm: map appears centred on Tuas (lat 1.32, lon 103.64) at zoom 12
-- [ ] Confirm: OpenStreetMap tiles load (you should see Singapore coastline and Tuas Port)
-- [ ] Confirm: 5 terminal zone rectangles appear as coloured overlays in the Tuas area
-- [ ] Confirm: anchorage zone appears as a dashed amber rectangle west of the terminals
-- [ ] Confirm: vessel dots appear (may take 30–60 seconds for AIS data)
-- [ ] Click a vessel dot → confirm popup shows name, status, speed, location, MMSI
-- [ ] Click a terminal zone → confirm popup shows terminal name and occupancy %
-- [ ] Click anchorage zone → confirm popup shows waiting vessel count and berth wait
-
-### 4.6 Floating overlay verification
-
-- [ ] Floating stats card is visible in top-right corner
-- [ ] Shows: risk score with correct colour, berth wait hours, inventory days with correct colour
-- [ ] Shows: vessel counts for berthed, waiting, transiting
-- [ ] If AIS offline: shows amber "AIS offline — no vessel data" warning
-
-### 4.7 Legend verification
-
-- [ ] Legend card is visible in bottom-left corner
-- [ ] Shows 5 items: Berthed vessel (green), Waiting vessel (amber), Transiting vessel (grey), Terminal zone (blue), Anchorage zone (amber)
-
-### 4.8 Tab switch verification
-
-- [ ] Switch from map to dashboard: dashboard renders correctly, no blank panels
-- [ ] Switch from dashboard back to map: map is still centred on Tuas, vessel dots still present
-- [ ] Risk badge and AIS status dot in Header are visible on BOTH tabs
-
-### 4.9 Known MapView gotchas — check if anything is broken
-
-- [ ] If map renders as a grey square with no tiles: CSS import is missing in main.jsx
-- [ ] If overlays appear behind map tiles: add `zIndex: 1000` to the overlay div styles
-- [ ] If vessel dots don't update: confirm `vessels` prop is being passed from App.jsx correctly
-- [ ] If map height is 0: confirm `style={{ height: 'calc(100vh - 56px)' }}` is on the wrapper div, not `MapContainer`
+- [x] Map tiles load, vessel dots appear, terminal polygons visible
+- [x] Floating stats overlay visible top-right
+- [x] Legend visible bottom-left (updated for GeoJSON polygons)
+- [x] Tab switching works correctly
+- [x] All terminals visible: Tuas + Pasir Panjang + Brani + Keppel + Tanjong Pagar
 
 **Phase 4 gate:** Live map tab shows tiles, vessel dots, zone overlays, and legend. Tab switching between dashboard and map works without errors. Floating stats overlay shows correct live values.
 
