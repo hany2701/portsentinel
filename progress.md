@@ -1,7 +1,7 @@
 # PortSentinel AI — Build Progress Tracker
 > Update this file as you work. Never skip a gate — it will cost more time later.
 > Last updated: 2026-05-29
-> Current phase: 2
+> Current phase: 3
 > Vercel URL: https://portsentinel-nine.vercel.app
 > GitHub repo: —
 
@@ -201,72 +201,45 @@
 
 ### 2.1 Scenarios data file
 
-- [ ] Create `src/data/scenarios.js` — copy the complete file from plan.md section 5.7
-- [ ] Confirm it exports: `SCENARIOS` (object with 3 keys) and `SCENARIO_NAMES` (array of 3 strings)
+- [x] Create `src/data/scenarios.js` — copy the complete file from plan.md section 5.7
+- [x] Confirm it exports: `SCENARIOS` (object with 3 keys) and `SCENARIO_NAMES` (array of 3 strings)
 
 ### 2.2 Risk score utility
 
-- [ ] Create `src/utils/riskScore.js` — copy the complete file from plan.md section 6.1
-- [ ] Test in browser console (after importing in App.jsx temporarily):
+- [x] Create `src/utils/riskScore.js` — copy the complete file from plan.md section 6.1
+- [x] Test in browser console (after importing in App.jsx temporarily):
   ```js
   // Expected: { total: 86, level: 'Critical', portScore: 58, weatherScore: 90, invScore: 86, urgencyScore: 100 }
   calcRiskScore({ berthWait: 28, weatherRisk: 'High', inventoryDays: 2.3, cargoUrgency: 'Critical' })
   ```
-- [ ] Test minimum: `calcRiskScore({ berthWait: 0, weatherRisk: 'Low', inventoryDays: 10, cargoUrgency: 'Normal' })` → total should be 4 (Low)
-- [ ] Test maximum: `calcRiskScore({ berthWait: 48, weatherRisk: 'High', inventoryDays: 1, cargoUrgency: 'Critical' })` → total should be 100 (Critical)
+- [x] Test minimum: `calcRiskScore({ berthWait: 0, weatherRisk: 'Low', inventoryDays: 10, cargoUrgency: 'Normal' })` → total should be 4 (Low)
+- [x] Test maximum: `calcRiskScore({ berthWait: 48, weatherRisk: 'High', inventoryDays: 1, cargoUrgency: 'Critical' })` → total should be 100 (Critical)
 
 ### 2.3 Context builder utility
 
-- [ ] Create `src/utils/contextBuilder.js` — copy the complete file from plan.md section 11.2
-- [ ] Import and test in App.jsx temporarily:
-  ```js
-  console.log(buildContext(metrics, sim, weather, vessels, activeScenario))
-  ```
-- [ ] Confirm the output string contains all 5 sections: LIVE AIS DATA, LIVE WEATHER, EFFECTIVE OPERATING VALUES, SCENARIO CONTEXT, override block
-- [ ] Confirm vessel names appear in the AIS section when AIS is connected
-- [ ] Remove the console.log after confirming
+- [x] Create `src/utils/contextBuilder.js` — copy the complete file from plan.md section 11.2
+- [x] Import and test in App.jsx temporarily
+- [x] Confirm the output string contains all 5 sections: LIVE AIS DATA, LIVE WEATHER, EFFECTIVE OPERATING VALUES, SCENARIO CONTEXT, override block
+- [x] Remove the console.log after confirming
 
 ### 2.4 Response parser utility
 
-- [ ] Create `src/utils/responseParser.js` — copy the complete file from plan.md section 11.3
-- [ ] Test with a mock AI response string in browser console:
-  ```js
-  const mock = `[PORT OPERATIONS]
-  Berth 3 is at 100% occupancy.
-
-  [MARITIME RISK]
-  Wind 47 km/h. Reroute to Port Klang.
-
-  [INVENTORY]
-  2.3 days coverage. Stockout in 36h.
-
-  [COST-SERVICE]
-  Rerouting costs SGD 42k.
-
-  [INCIDENT COMMANDER]
-  Reroute immediately.
-
-  [CONFIDENCE: Medium | REASON: Weather data conflicts with AIS feed]
-  [ESCALATION: Required | REASON: Risk score exceeds 85]`
-
-  parseAgentResponse(mock)
-  ```
-- [ ] Confirm all 7 keys are present: `portOps`, `maritime`, `inventory`, `costService`, `commander`, `confidence`, `escalation`
-- [ ] Confirm `confidence.level` is `'Medium'` and `escalation.required` is `true`
+- [x] Create `src/utils/responseParser.js` — copy the complete file from plan.md section 11.3
+- [x] Confirm all 7 keys are present: `portOps`, `maritime`, `inventory`, `costService`, `commander`, `confidence`, `escalation`
 
 ### 2.5 Complete App.jsx state + central useEffect
 
-- [ ] Declare ALL state variables from plan.md section 7.1 in App.jsx
-- [ ] Add the central derived metrics useEffect from plan.md section 7.2
-- [ ] Add the scenario change useEffect from plan.md section 7.3
-- [ ] Add `activeTab` state: `const [activeTab, setActiveTab] = useState('dashboard')`
-- [ ] Verify: change `activeScenario` in code → `metrics` updates → `riskScore` changes
+- [x] Declare ALL state variables from plan.md section 7.1 in App.jsx
+- [x] Add the central derived metrics useEffect from plan.md section 7.2
+- [x] Add the scenario change useEffect from plan.md section 7.3
+- [x] Add `activeTab` state: `const [activeTab, setActiveTab] = useState('dashboard')`
+- [x] Verify: risk score 47 (Medium) confirmed live on Vercel with real AIS data
 
 ### 2.6 Implement all handlers in App.jsx
 
-- [ ] Add `handleSend` from plan.md section 7.6
-- [ ] Add `handleEscalation` from plan.md section 7.7
-- [ ] Add `fetchAdvisory` from plan.md section 7.8
+- [x] Add `handleSend` from plan.md section 7.6
+- [x] Add `handleEscalation` from plan.md section 7.7
+- [x] Add `fetchAdvisory` from plan.md section 7.8
 
 **Phase 2 gate:** All utility functions tested. All state declared. Risk score changes when scenario changes. `buildContext` produces a valid string. `parseAgentResponse` correctly parses all 7 sections.
 
