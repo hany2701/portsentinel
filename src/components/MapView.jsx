@@ -1,5 +1,6 @@
-import { MapContainer, TileLayer, CircleMarker, Rectangle, Popup } from 'react-leaflet'
-import { TERMINAL_ZONES, WAITING_ANCHORAGE } from '../utils/vesselClassifier'
+import { MapContainer, TileLayer, CircleMarker, Rectangle, Polygon, Popup } from 'react-leaflet'
+import { WAITING_ANCHORAGE } from '../utils/vesselClassifier'
+import geoData from '../data/port-zones.json'
 
 const STATUS_COLOURS = {
   berthed:     '#1D9E75',
@@ -8,16 +9,36 @@ const STATUS_COLOURS = {
   transiting:  '#888780'
 }
 
+// GeoJSON uses [lon, lat] — Leaflet needs [lat, lon]
+function toLeaflet(ring) {
+  return ring.map(([lon, lat]) => [lat, lon])
+}
+
+// Extract terminal polygons from GeoJSON once at module load
+const tuasPositions = (() => {
+  const f = geoData.features.find(f => f.properties.id === 'tuas-terminal')
+  return f ? toLeaflet(f.geometry.coordinates[0]) : []
+})()
+
+const REFERENCE_TERMINALS = geoData.features
+  .filter(f => f.geometry.type === 'Polygon' && f.properties.id !== 'tuas-terminal')
+  .map(f => ({ name: f.properties.name, positions: toLeaflet(f.geometry.coordinates[0]) }))
+
 export default function MapView({ vessels, metrics, sim, aisConnected }) {
   const berthedCount    = vessels.filter(v => v.status === 'berthed').length
   const waitingCount    = vessels.filter(v => v.status === 'waiting').length
   const transitingCount = vessels.filter(v => v.status === 'transiting').length
 
+  const avgOcc = Math.round(
+    Object.values(metrics.berthOccupancy).reduce((a, b) => a + b, 0) / 5
+  )
+  const tuasColour = avgOcc >= 85 ? '#E24B4A' : avgOcc >= 70 ? '#BA7517' : '#1D9E75'
+
   return (
     <div style={{ position: 'relative', height: 'calc(100vh - 56px)' }}>
       <MapContainer
-        center={[1.245, 103.635]}
-        zoom={13}
+        center={[1.270, 103.72]}
+        zoom={11}
         style={{ height: '100%', width: '100%' }}
         zoomControl={true}
       >
@@ -41,24 +62,35 @@ export default function MapView({ vessels, metrics, sim, aisConnected }) {
           </Popup>
         </Rectangle>
 
-        {/* Terminal zone overlays */}
-        {Object.entries(TERMINAL_ZONES).map(([name, zone]) => {
-          const occ = metrics.berthOccupancy[name] ?? 0
-          const colour = occ >= 85 ? '#E24B4A' : occ >= 70 ? '#BA7517' : '#1D9E75'
-          return (
-            <Rectangle
-              key={name}
-              bounds={[[zone.latMin, zone.lonMin], [zone.latMax, zone.lonMax]]}
-              pathOptions={{ color: colour, fillColor: colour, fillOpacity: 0.12, weight: 1.5, dashArray: name === 'T5' ? '4 4' : null }}
-            >
-              <Popup>
-                <strong>{name}</strong><br />
-                Occupancy: {occ}%<br />
-                Status: {occ >= 85 ? 'Critical' : occ >= 70 ? 'High' : 'Normal'}
-              </Popup>
-            </Rectangle>
-          )
-        })}
+        {/* Tuas Mega Port — actual GeoJSON polygon, coloured by occupancy */}
+        {tuasPositions.length > 0 && (
+          <Polygon
+            positions={tuasPositions}
+            pathOptions={{ color: tuasColour, fillColor: tuasColour, fillOpacity: 0.15, weight: 2 }}
+          >
+            <Popup>
+              <strong>Tuas Mega Port</strong><br />
+              T1: {metrics.berthOccupancy.T1}% &nbsp;T2: {metrics.berthOccupancy.T2}% &nbsp;T3: {metrics.berthOccupancy.T3}%<br />
+              T4: {metrics.berthOccupancy.T4}% &nbsp;T5: {metrics.berthOccupancy.T5}%<br />
+              Avg occupancy: {avgOcc}%<br />
+              Status: {avgOcc >= 85 ? 'Critical' : avgOcc >= 70 ? 'High' : 'Normal'}
+            </Popup>
+          </Polygon>
+        )}
+
+        {/* Reference terminals — visual only, grey dashed outlines */}
+        {REFERENCE_TERMINALS.map(({ name, positions }) => (
+          <Polygon
+            key={name}
+            positions={positions}
+            pathOptions={{ color: '#9ca3af', fillColor: '#9ca3af', fillOpacity: 0.08, weight: 1.5, dashArray: '4 3' }}
+          >
+            <Popup>
+              <strong>{name}</strong><br />
+              <span style={{ color: '#6b7280', fontSize: 11 }}>Reference terminal — visual only</span>
+            </Popup>
+          </Polygon>
+        ))}
 
         {/* Vessel dots */}
         {vessels.map(v => {
@@ -142,11 +174,12 @@ export default function MapView({ vessels, metrics, sim, aisConnected }) {
       }}>
         <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 8, fontWeight: 500 }}>Map legend</div>
         {[
-          ['Berthed vessel',    '#1D9E75'],
-          ['Waiting vessel',    '#BA7517'],
-          ['Transiting vessel', '#888780'],
-          ['Terminal zone',     '#378ADD'],
-          ['Anchorage zone',    '#BA7517']
+          ['Berthed vessel',       '#1D9E75'],
+          ['Waiting vessel',       '#BA7517'],
+          ['Transiting vessel',    '#888780'],
+          ['Tuas Mega Port',       '#1D9E75'],
+          ['Reference terminals',  '#9ca3af'],
+          ['Anchorage zone',       '#BA7517']
         ].map(([label, colour]) => (
           <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#374151', marginBottom: 4 }}>
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: colour, flexShrink: 0, opacity: 0.85 }} />

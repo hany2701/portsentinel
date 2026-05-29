@@ -1,0 +1,558 @@
+{
+  "type": "FeatureCollection",
+  "name": "port-operational-zones",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "pasir-panjang-terminal",
+        "name": "Pasir Panjang Terminal",
+        "source": "Google My Maps export: mymap.kml",
+        "source_status": "manual_user_drawn_not_official_nautical_boundary",
+        "type": "port_operational_polygon",
+        "operational_category": "singapore_terminal",
+        "congestion_metrics": {
+          "enabled": false,
+          "vessel_count": 0,
+          "risk_level": "unknown"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.7530022,
+              1.2852159
+            ],
+            [
+              103.7501698,
+              1.2803247
+            ],
+            [
+              103.7706833,
+              1.268483
+            ],
+            [
+              103.7766914,
+              1.278866
+            ],
+            [
+              103.7867336,
+              1.2726877
+            ],
+            [
+              103.7786655,
+              1.2592156
+            ],
+            [
+              103.7857037,
+              1.2550967
+            ],
+            [
+              103.7959175,
+              1.2719154
+            ],
+            [
+              103.7623577,
+              1.2936251
+            ],
+            [
+              103.7614565,
+              1.2921235
+            ],
+            [
+              103.7608986,
+              1.2906218
+            ],
+            [
+              103.7723999,
+              1.2834997
+            ],
+            [
+              103.7692242,
+              1.2782653
+            ],
+            [
+              103.7564354,
+              1.2857307
+            ],
+            [
+              103.7530022,
+              1.2852159
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "brani-terminal",
+        "name": "Brani Terminal",
+        "source": "Google My Maps export: mymap.kml",
+        "source_status": "manual_user_drawn_not_official_nautical_boundary",
+        "type": "port_operational_polygon",
+        "operational_category": "singapore_terminal",
+        "congestion_metrics": {
+          "enabled": false,
+          "vessel_count": 0,
+          "risk_level": "unknown"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.824262,
+              1.2602278
+            ],
+            [
+              103.8248842,
+              1.259005
+            ],
+            [
+              103.8262361,
+              1.2579753
+            ],
+            [
+              103.8272553,
+              1.2576213
+            ],
+            [
+              103.829208,
+              1.2586296
+            ],
+            [
+              103.8302917,
+              1.2591874
+            ],
+            [
+              103.8300717,
+              1.2617778
+            ],
+            [
+              103.8312679,
+              1.2625554
+            ],
+            [
+              103.8318741,
+              1.2617402
+            ],
+            [
+              103.8325339,
+              1.2610323
+            ],
+            [
+              103.8342934,
+              1.2589943
+            ],
+            [
+              103.8350338,
+              1.25834
+            ],
+            [
+              103.8365358,
+              1.256774
+            ],
+            [
+              103.8373941,
+              1.2558944
+            ],
+            [
+              103.8398617,
+              1.2570743
+            ],
+            [
+              103.8406127,
+              1.2569885
+            ],
+            [
+              103.842501,
+              1.2579539
+            ],
+            [
+              103.8362354,
+              1.2639391
+            ],
+            [
+              103.8304847,
+              1.2637246
+            ],
+            [
+              103.824262,
+              1.2602278
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "keppel-terminal",
+        "name": "Keppel Terminal",
+        "source": "Google My Maps export: mymap.kml",
+        "source_status": "manual_user_drawn_not_official_nautical_boundary",
+        "type": "port_operational_polygon",
+        "operational_category": "singapore_terminal",
+        "congestion_metrics": {
+          "enabled": false,
+          "vessel_count": 0,
+          "risk_level": "unknown"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8317342,
+              1.2711847
+            ],
+            [
+              103.8316591,
+              1.2700691
+            ],
+            [
+              103.8274212,
+              1.267098
+            ],
+            [
+              103.8274748,
+              1.2655641
+            ],
+            [
+              103.8240416,
+              1.2636656
+            ],
+            [
+              103.8242562,
+              1.263022
+            ],
+            [
+              103.8320989,
+              1.2674305
+            ],
+            [
+              103.839534,
+              1.2676987
+            ],
+            [
+              103.8397808,
+              1.2686426
+            ],
+            [
+              103.8418193,
+              1.2707235
+            ],
+            [
+              103.8394375,
+              1.2715172
+            ],
+            [
+              103.8317342,
+              1.2711847
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "tanjong-pagar-terminal",
+        "name": "Tanjong Pagar Terminal",
+        "source": "Google My Maps export: mymap.kml",
+        "source_status": "manual_user_drawn_not_official_nautical_boundary",
+        "type": "port_operational_polygon",
+        "operational_category": "singapore_terminal",
+        "congestion_metrics": {
+          "enabled": false,
+          "vessel_count": 0,
+          "risk_level": "unknown"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.8440361,
+              1.2724915
+            ],
+            [
+              103.8397446,
+              1.2685764
+            ],
+            [
+              103.8395086,
+              1.2674716
+            ],
+            [
+              103.8460219,
+              1.2615241
+            ],
+            [
+              103.8468027,
+              1.2624122
+            ],
+            [
+              103.8443619,
+              1.2655657
+            ],
+            [
+              103.845746,
+              1.2668153
+            ],
+            [
+              103.851223,
+              1.2607389
+            ],
+            [
+              103.8521564,
+              1.2614897
+            ],
+            [
+              103.8507402,
+              1.2630772
+            ],
+            [
+              103.8513089,
+              1.2635921
+            ],
+            [
+              103.8516629,
+              1.2635706
+            ],
+            [
+              103.85162,
+              1.2728595
+            ],
+            [
+              103.85059,
+              1.2732885
+            ],
+            [
+              103.8479185,
+              1.2721516
+            ],
+            [
+              103.8440361,
+              1.2724915
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "tuas-terminal",
+        "name": "Tuas Terminal",
+        "source": "Google My Maps export: mymap.kml",
+        "source_status": "manual_user_drawn_not_official_nautical_boundary",
+        "type": "port_operational_polygon",
+        "operational_category": "singapore_terminal",
+        "congestion_metrics": {
+          "enabled": false,
+          "vessel_count": 0,
+          "risk_level": "unknown"
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              103.61599,
+              1.2700018
+            ],
+            [
+              103.6137619,
+              1.2669314
+            ],
+            [
+              103.6138477,
+              1.2174188
+            ],
+            [
+              103.6174525,
+              1.2167323
+            ],
+            [
+              103.6427082,
+              1.2100176
+            ],
+            [
+              103.6553897,
+              1.2153164
+            ],
+            [
+              103.6541023,
+              1.2208083
+            ],
+            [
+              103.6169376,
+              1.2208512
+            ],
+            [
+              103.6170234,
+              1.2289603
+            ],
+            [
+              103.6499823,
+              1.229089
+            ],
+            [
+              103.6499394,
+              1.2380992
+            ],
+            [
+              103.6174954,
+              1.2382279
+            ],
+            [
+              103.6175779,
+              1.244881
+            ],
+            [
+              103.6379197,
+              1.2450097
+            ],
+            [
+              103.644357,
+              1.248013
+            ],
+            [
+              103.644357,
+              1.2540197
+            ],
+            [
+              103.6162904,
+              1.2542343
+            ],
+            [
+              103.6163118,
+              1.2607344
+            ],
+            [
+              103.6434558,
+              1.2606915
+            ],
+            [
+              103.6434343,
+              1.2697873
+            ],
+            [
+              103.6355165,
+              1.2698517
+            ],
+            [
+              103.6356452,
+              1.2738418
+            ],
+            [
+              103.6401084,
+              1.2733913
+            ],
+            [
+              103.6406019,
+              1.279398
+            ],
+            [
+              103.630667,
+              1.2800844
+            ],
+            [
+              103.6270407,
+              1.2672988
+            ],
+            [
+              103.6205175,
+              1.2675348
+            ],
+            [
+              103.6207965,
+              1.2699375
+            ],
+            [
+              103.61599,
+              1.2700018
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "port-klang",
+        "name": "Port Klang",
+        "source": "Google My Maps export: mymap.kml",
+        "source_status": "manual_user_drawn_not_official_nautical_boundary",
+        "type": "port_reference_marker",
+        "operational_category": "malaysia_port_marker",
+        "congestion_metrics": {
+          "enabled": false,
+          "vessel_count": 0,
+          "risk_level": "unknown"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.3926701,
+          3.0013082
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "port-tanjung-pelepas",
+        "name": "Port Tanjung Pelepas",
+        "source": "Google My Maps export: mymap.kml",
+        "source_status": "manual_user_drawn_not_official_nautical_boundary",
+        "type": "port_reference_marker",
+        "operational_category": "malaysia_port_marker",
+        "congestion_metrics": {
+          "enabled": false,
+          "vessel_count": 0,
+          "risk_level": "unknown"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.5537459,
+          1.3622689
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "batam-port",
+        "name": "Batam Port",
+        "source": "Google My Maps export: mymap.kml",
+        "source_status": "manual_user_drawn_not_official_nautical_boundary",
+        "type": "port_reference_marker",
+        "operational_category": "indonesia_port_marker",
+        "congestion_metrics": {
+          "enabled": false,
+          "vessel_count": 0,
+          "risk_level": "unknown"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          104.055142,
+          1.1305231
+        ]
+      }
+    }
+  ]
+}
