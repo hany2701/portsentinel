@@ -1,0 +1,771 @@
+# PortSentinel AI — Build Progress Tracker
+> Update this file as you work. Never skip a gate — it will cost more time later.
+> Last updated: —
+> Current phase: 0
+> Vercel URL: —
+> GitHub repo: —
+
+---
+
+## Phase Overview
+
+| Phase | Focus | Est. Time | Gate condition |
+|---|---|---|---|
+| 0 | Project setup + deploy pipeline | 1–2h | Empty app live on Vercel, /api/chat stub works |
+| 1 | Data layer — AIS + weather + news | 3–4h | Console shows live vessels + real weather numbers |
+| 2 | Business logic — state, formula, classifiers | 2–3h | Risk score updates live when values change |
+| 3 | UI components — dashboard panels | 4–5h | Full dashboard visible, all panels render with data |
+| 4 | MapView tab | 1–2h | Map shows vessel dots + zone overlays, tab switch works |
+| 5 | AI integration | 2–3h | Chat returns structured multi-agent response |
+| 6 | Simulator + live data wiring | 1–2h | Sliders override live data correctly |
+| 7 | Error handling + fallbacks | 1–2h | App works gracefully when APIs are unreachable |
+| 8 | Polish + final deploy | 1–2h | Live Vercel URL, clean GitHub, all scenarios work |
+
+**Total estimate: 16–23 hours**
+
+---
+
+## Phase 0 — Project Setup and Deploy Pipeline
+
+**Goal:** A blank React app is running locally and deployed to Vercel. The serverless function pipeline is confirmed working before any real code is written.
+
+**Why this first:** If Vercel routing is broken or env vars are misconfigured, you want to know now — not after 15 hours of building.
+
+### 0.1 Repository
+
+- [ ] Create a new GitHub repository named `portsentinel`
+- [ ] Clone it locally: `git clone https://github.com/YOUR_USERNAME/portsentinel.git`
+- [ ] `cd portsentinel`
+
+### 0.2 Project initialisation
+
+- [ ] `npm create vite@latest . -- --template react`  ← note the `.` to init in current folder
+- [ ] `npm install tailwindcss postcss autoprefixer`
+- [ ] `npx tailwindcss init -p`
+- [ ] `npm install recharts`
+- [ ] `npm install leaflet react-leaflet`
+- [ ] `npm install @anthropic-ai/sdk`
+- [ ] Confirm `package.json` has all five dependencies listed above
+
+### 0.3 Config files
+
+- [ ] Replace contents of `src/index.css` with:
+  ```css
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+  ```
+- [ ] Replace contents of `tailwind.config.js` with:
+  ```js
+  export default {
+    content: ["./index.html", "./src/**/*.{js,jsx}"],
+    theme: { extend: {} },
+    plugins: []
+  }
+  ```
+- [ ] Create `vercel.json` in the project root (copy from plan.md section 4.4)
+- [ ] Create `.env.local` in the project root with all three API keys (copy from plan.md section 4.5)
+- [ ] Create `.gitignore` with these lines:
+  ```
+  node_modules
+  dist
+  .env.local
+  .env
+  ```
+- [ ] Confirm `.gitignore` is working: `git status` must NOT show `.env.local`
+
+### 0.4 Leaflet CSS — critical step
+
+- [ ] Open `src/main.jsx`
+- [ ] Add `import 'leaflet/dist/leaflet.css'` as the FIRST import, before everything else
+- [ ] Final `main.jsx` should look exactly like plan.md section 4.1
+
+### 0.5 Vercel connection
+
+- [ ] `git add .`
+- [ ] `git commit -m "chore: project initialisation"`
+- [ ] `git push origin main`
+- [ ] Go to vercel.com → New Project → import your GitHub repo
+- [ ] In Vercel project settings → Environment Variables → add:
+  - `VITE_AISSTREAM_KEY` = your AISStream key
+  - `ANTHROPIC_API_KEY` = your Anthropic key
+  - `CURRENTS_API_KEY` = your Currents API key
+- [ ] Trigger first deploy → confirm it succeeds (green checkmark)
+- [ ] Visit the Vercel URL → confirm the blank React app loads
+
+### 0.6 Serverless function smoke test
+
+- [ ] Create `api/chat.js` with ONLY a stub response — no real Anthropic call yet:
+  ```js
+  export default async function handler(req, res) {
+    res.json({ content: 'stub response — API route working' })
+  }
+  ```
+- [ ] Push to GitHub → Vercel auto-deploys
+- [ ] Open browser console on the Vercel URL and run:
+  ```js
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: [], context: 'test' })
+  }).then(r => r.json()).then(console.log)
+  ```
+- [ ] Confirm you see `{ content: 'stub response — API route working' }` in the console
+- [ ] If you see a CORS error: check `vercel.json` headers are correct and redeploy
+
+**Phase 0 gate:** Vercel URL loads blank app. `/api/chat` returns stub response. No errors in console. `.env.local` is NOT in git.
+
+---
+
+## Phase 1 — Data Layer
+
+**Goal:** All three live data sources are confirmed working. Vessel objects and weather numbers are visible in the console before any UI is built.
+
+**Why before UI:** You need to see what AIS data actually looks like for your bounding box before you build components to display it. Vessel density and zone accuracy cannot be assumed.
+
+### 1.1 Vessel classifier utilities
+
+- [ ] Create `src/utils/vesselClassifier.js` — copy the complete file from plan.md section 5.3
+- [ ] Confirm the file exports: `TERMINAL_ZONES`, `WAITING_ANCHORAGE`, `BERTH_CAPACITY`, `classifyVessel`, `isCargoVessel`, `calcBerthOccupancy`, `calcWaitMetrics`
+
+### 1.2 AIS WebSocket hook
+
+- [ ] Create `src/hooks/useAISStream.js` — copy the complete file from plan.md section 5.4
+- [ ] In `src/App.jsx`, add at the top of the component:
+  ```jsx
+  import { useAISStream } from './hooks/useAISStream'
+  const { vessels, connected } = useAISStream()
+  console.log('AIS vessels:', vessels.length, 'connected:', connected)
+  ```
+- [ ] `npm run dev` and open localhost
+- [ ] Wait 30–60 seconds — watch the console for vessel objects appearing
+- [ ] Confirm vessel objects have these fields: `mmsi`, `name`, `lat`, `lon`, `sog`, `location`, `status`
+- [ ] Confirm `status` values are one of: `berthed`, `waiting`, `manoeuvring`, `transiting`
+- [ ] If `connected` stays `false`: check your `VITE_AISSTREAM_KEY` in `.env.local`
+- [ ] If all vessels show `status: 'transiting'`: your zone boundaries may need widening — expand each zone by 0.005 degrees in all directions in `TERMINAL_ZONES`
+- [ ] If fewer than 3 vessels appear after 2 minutes: the bounding box is correct but traffic is low — this is expected for Tuas during off-peak hours, scenario defaults will cover it
+- [ ] Remove the `console.log` line from App.jsx after confirming
+
+### 1.3 Weather mapper utility
+
+- [ ] Create `src/utils/weatherMapper.js` — copy from plan.md section 5.6
+- [ ] Test it manually in browser console (after importing): `mapWeatherRisk(47, 2.1)` → should return `'Medium'`
+- [ ] Test edge cases: `mapWeatherRisk(70, 4.0)` → `'High'`, `mapWeatherRisk(10, 0.5)` → `'Low'`
+
+### 1.4 Weather API route
+
+- [ ] Create `api/weather.js` — copy the complete file from plan.md section 12.2
+- [ ] Push to GitHub and wait for Vercel deploy
+- [ ] Test by visiting `YOUR_VERCEL_URL/api/weather` in the browser
+- [ ] Confirm response has: `strait.wind_kmh`, `strait.wave_m`, `strait.swell_m`, `sg.wind_kmh`, `stale: false`
+- [ ] If either fetch fails: check Open-Meteo API URLs are correct, they are public and require no key
+
+### 1.5 News API route
+
+- [ ] Create `api/news.js` — copy the complete file from plan.md section 12.3
+- [ ] Confirm `CURRENTS_API_KEY` is set in Vercel environment variables
+- [ ] Push and test `YOUR_VERCEL_URL/api/news`
+- [ ] Confirm `articles` array is returned (may be empty if no relevant results — that is fine)
+- [ ] If 401 error: API key is missing or wrong in Vercel env vars
+
+### 1.6 Advisory API route
+
+- [ ] Create `api/advisory.js` — copy the complete file from plan.md section 12.4
+- [ ] Push to GitHub
+- [ ] Test with a POST request from browser console:
+  ```js
+  fetch('/api/advisory', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ wind_kmh: 47, wave_m: 2.1, swell_m: 1.8, sg_wind_kmh: 22 })
+  }).then(r => r.json()).then(console.log)
+  ```
+- [ ] Confirm you receive `{ advisory: "Two sentence maritime advisory..." }`
+
+### 1.7 Wire weather and news fetches in App.jsx
+
+- [ ] Add `weather` state and `news` state to App.jsx (see plan.md section 7.1)
+- [ ] Add the weather fetch useEffect from plan.md section 7.4
+- [ ] Add the news fetch useEffect from plan.md section 7.5
+- [ ] Add temporary `console.log(weather, news)` to confirm both arrive
+- [ ] Confirm in console: weather object has real numbers, news has articles
+- [ ] Remove console.log after confirming
+
+**Phase 1 gate:** AIS vessels populate within 60 seconds. `/api/weather` returns real numbers. `/api/news` returns without error. `/api/advisory` returns two-sentence text. All confirmed via console or direct URL test.
+
+---
+
+## Phase 2 — Business Logic
+
+**Goal:** All utility functions work correctly in isolation. Complete state shape is declared in App.jsx. Risk score responds to input changes.
+
+### 2.1 Scenarios data file
+
+- [ ] Create `src/data/scenarios.js` — copy the complete file from plan.md section 5.7
+- [ ] Confirm it exports: `SCENARIOS` (object with 3 keys) and `SCENARIO_NAMES` (array of 3 strings)
+
+### 2.2 Risk score utility
+
+- [ ] Create `src/utils/riskScore.js` — copy the complete file from plan.md section 6.1
+- [ ] Test in browser console (after importing in App.jsx temporarily):
+  ```js
+  // Expected: { total: 86, level: 'Critical', portScore: 58, weatherScore: 90, invScore: 86, urgencyScore: 100 }
+  calcRiskScore({ berthWait: 28, weatherRisk: 'High', inventoryDays: 2.3, cargoUrgency: 'Critical' })
+  ```
+- [ ] Test minimum: `calcRiskScore({ berthWait: 0, weatherRisk: 'Low', inventoryDays: 10, cargoUrgency: 'Normal' })` → total should be 4 (Low)
+- [ ] Test maximum: `calcRiskScore({ berthWait: 48, weatherRisk: 'High', inventoryDays: 1, cargoUrgency: 'Critical' })` → total should be 100 (Critical)
+
+### 2.3 Context builder utility
+
+- [ ] Create `src/utils/contextBuilder.js` — copy the complete file from plan.md section 11.2
+- [ ] Import and test in App.jsx temporarily:
+  ```js
+  console.log(buildContext(metrics, sim, weather, vessels, activeScenario))
+  ```
+- [ ] Confirm the output string contains all 5 sections: LIVE AIS DATA, LIVE WEATHER, EFFECTIVE OPERATING VALUES, SCENARIO CONTEXT, override block
+- [ ] Confirm vessel names appear in the AIS section when AIS is connected
+- [ ] Remove the console.log after confirming
+
+### 2.4 Response parser utility
+
+- [ ] Create `src/utils/responseParser.js` — copy the complete file from plan.md section 11.3
+- [ ] Test with a mock AI response string in browser console:
+  ```js
+  const mock = `[PORT OPERATIONS]
+  Berth 3 is at 100% occupancy.
+
+  [MARITIME RISK]
+  Wind 47 km/h. Reroute to Port Klang.
+
+  [INVENTORY]
+  2.3 days coverage. Stockout in 36h.
+
+  [COST-SERVICE]
+  Rerouting costs SGD 42k.
+
+  [INCIDENT COMMANDER]
+  Reroute immediately.
+
+  [CONFIDENCE: Medium | REASON: Weather data conflicts with AIS feed]
+  [ESCALATION: Required | REASON: Risk score exceeds 85]`
+
+  parseAgentResponse(mock)
+  ```
+- [ ] Confirm all 7 keys are present: `portOps`, `maritime`, `inventory`, `costService`, `commander`, `confidence`, `escalation`
+- [ ] Confirm `confidence.level` is `'Medium'` and `escalation.required` is `true`
+
+### 2.5 Complete App.jsx state + central useEffect
+
+- [ ] Declare ALL state variables from plan.md section 7.1 in App.jsx
+- [ ] Add the central derived metrics useEffect from plan.md section 7.2
+- [ ] Add the scenario change useEffect from plan.md section 7.3
+- [ ] Add `activeTab` state: `const [activeTab, setActiveTab] = useState('dashboard')`
+- [ ] Verify: change `activeScenario` in code → `metrics` updates → `riskScore` changes
+
+### 2.6 Implement all handlers in App.jsx
+
+- [ ] Add `handleSend` from plan.md section 7.6
+- [ ] Add `handleEscalation` from plan.md section 7.7
+- [ ] Add `fetchAdvisory` from plan.md section 7.8
+
+**Phase 2 gate:** All utility functions tested. All state declared. Risk score changes when scenario changes. `buildContext` produces a valid string. `parseAgentResponse` correctly parses all 7 sections.
+
+---
+
+## Phase 3 — Dashboard UI Components
+
+**Goal:** The full dashboard is visible with real data. All panels render correctly. No AI connected yet.
+
+**Build order:** Header → MetricsBar → TerminalChart → RiskBreakdown → WeatherDetail → Simulator → AgentPanel → TradeoffTable → Confidence → ChatBox → Escalation
+
+### 3.1 App layout skeleton
+
+- [ ] In `App.jsx` return statement, set up the full layout structure from plan.md section 8
+- [ ] Use placeholder `<div className="p-4 text-gray-400">ComponentName</div>` for each component
+- [ ] Confirm the layout grid renders correctly with no overlap or overflow at 1440px width
+
+### 3.2 Header.jsx
+
+- [ ] Create `src/components/Header.jsx`
+- [ ] Renders: app name (PortSentinel AI), tab switcher (Control tower | Live map), scenario dropdown, AIS status dot, risk badge, live clock
+- [ ] Tab switcher code: copy from plan.md section 9.1
+- [ ] AIS status dot: green pulsing circle when `aisConnected = true`, grey static when false
+- [ ] Risk badge colour: red for Critical, orange for High, amber for Medium, green for Low
+- [ ] Live clock: use `setInterval` in a `useEffect` that calls `new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit', second: '2-digit' })`
+- [ ] Scenario dropdown: map over `SCENARIO_NAMES` from `scenarios.js` to render options
+- [ ] Confirm: clicking tab buttons calls `onTabChange` correctly
+- [ ] Confirm: changing scenario dropdown calls `onScenarioChange`
+- [ ] Confirm: clock ticks every second
+
+### 3.3 MetricsBar.jsx
+
+- [ ] Create `src/components/MetricsBar.jsx`
+- [ ] Renders 4 KPI cards in a 4-column grid: Berth wait, Weather risk, Inventory coverage, Risk score
+- [ ] Each card has: source label tag (● Live or ~ Simulated), metric name, large value, colour progress bar, subtitle
+- [ ] Bar fill width = percentage of max: berth wait max 48h, risk score max 100, inventory max 14 days
+- [ ] Colour logic per card:
+  - Berth wait: green < 12h, amber 12–23h, orange 24–35h, red ≥ 36h
+  - Weather risk: green = Low, amber = Medium, red = High
+  - Inventory: red < 3 days, amber 3–5 days, green > 5 days
+  - Risk score: green < 40, amber 40–69, orange 70–84, red ≥ 85
+- [ ] Confirm all 4 cards show real values from `metrics` and `sim` props
+
+### 3.4 TerminalChart.jsx
+
+- [ ] Create `src/components/TerminalChart.jsx`
+- [ ] Renders 5 horizontal bars labelled T1–T5
+- [ ] Bar fill width = occupancy percentage from `berthOccupancy` prop
+- [ ] Bar colour: green < 70%, amber 70–84%, red ≥ 85%
+- [ ] Below bars: list of waiting vessel names from `waitingVessels` prop (show first 3, then "+ N more")
+- [ ] Show `aisConnected` status: if false, show "~ Scenario defaults" tag instead of "● Live (AIS)"
+- [ ] Confirm: bars fill correctly for all 3 scenarios
+
+### 3.5 RiskBreakdown.jsx
+
+- [ ] Create `src/components/RiskBreakdown.jsx`
+- [ ] Renders 4 labelled horizontal bars: Port congestion (30%), Weather risk (25%), Inventory risk (25%), Cargo urgency (20%)
+- [ ] Each bar shows its weighted component score (0–100) from `riskComponents` prop
+- [ ] Bar fill width = score value as percentage
+- [ ] Below bars: total weighted score and level label
+- [ ] Small footnote: "Port 30% · Weather 25% · Inventory 25% · Urgency 20%"
+- [ ] Confirm: scores change when simulator values change
+
+### 3.6 WeatherDetail.jsx
+
+- [ ] Create `src/components/WeatherDetail.jsx`
+- [ ] Renders: two metric mini-cards (wind speed, wave height), and AI advisory block
+- [ ] Wind speed card: value from `weather.strait.wind_kmh`, coloured by speed
+- [ ] Wave height card: value from `weather.strait.wave_m`, coloured by height thresholds
+- [ ] AI advisory block: shows `advisory` text prop with `◈ AI-generated` label
+- [ ] Loading state: show skeleton when `advisoryLoading = true`
+- [ ] Stale state: show amber "Data unavailable" when `weather?.stale = true`
+- [ ] Null state: show "Fetching weather..." when `weather = null`
+
+### 3.7 Simulator.jsx
+
+- [ ] Create `src/components/Simulator.jsx`
+- [ ] Renders 5 controls:
+  1. Berth wait slider (0–48h, step 1) with enable toggle — when toggle off: slider greyed, shows "(Live: Xh)"
+  2. Weather risk slider/buttons (Low / Medium / High) with enable toggle — when toggle off: shows "(Live: X)"
+  3. Inventory days slider (1–14, step 0.5) — always active
+  4. Cargo urgency selector (Normal / High / Critical) — always active
+  5. Rerouting cost selector (Low / Medium / High) — always active
+- [ ] Below controls: live risk score display with colour coding
+- [ ] Below risk score: formula footnote "Port 30% · Weather 25% · Inventory 25% · Urgency 20%"
+- [ ] "Ask AI about this scenario ↗" button — calls `onAskAI` prop
+- [ ] When toggle is ON and override differs from live value: show "(Live: X)" in small muted text
+- [ ] Confirm: moving any slider immediately updates risk score (no AI call)
+
+### 3.8 AgentPanel.jsx
+
+- [ ] Create `src/components/AgentPanel.jsx`
+- [ ] Renders 4 agent cards: Port Operations, Maritime Risk, Inventory, Cost-Service
+- [ ] Each card: icon, agent name, text content from `agentSections` prop
+- [ ] Loading skeleton: when `aiLoading = true`, show 3 grey placeholder lines per card
+- [ ] Empty state: when `agentSections = null`, show "Ask a question or use the simulator to activate the agent panel"
+- [ ] Below 4 cards: Incident Commander block with distinct background (darker border, slightly different bg)
+- [ ] Incident Commander shows `agentSections.commander` text
+- [ ] Escalation indicator: if `agentSections.escalation.required = true`, show red "Escalation required" banner inside Incident Commander block
+
+### 3.9 TradeoffTable.jsx
+
+- [ ] Create `src/components/TradeoffTable.jsx`
+- [ ] Renders 4-row table with columns: Option, Benefit, Risk, Status
+- [ ] Row data is static text — only Status badge changes dynamically
+- [ ] Import and use `getRowStatus` function from plan.md section 14
+- [ ] Status badge colours: danger = red bg, warning = amber bg, success = green bg, neutral = grey bg
+- [ ] Confirm: changing riskScore prop changes badge labels and colours instantly (no AI needed)
+
+### 3.10 Confidence.jsx
+
+- [ ] Create `src/components/Confidence.jsx`
+- [ ] Renders: 5-segment bar coloured by level (High = 5 green, Medium = 3 green + 2 grey, Low = 1 green + 4 grey)
+- [ ] Shows confidence level label and reason text from `confidence` prop
+- [ ] Below: list of conflict strings from `conflicts` prop, each with an amber warning icon
+- [ ] Empty conflicts state: "All data sources consistent" in green
+- [ ] Null confidence state: "No AI assessment yet" in grey
+- [ ] Confirm: conflict flags appear when AIS is offline (check by temporarily using wrong AIS key)
+
+### 3.11 ChatBox.jsx
+
+- [ ] Create `src/components/ChatBox.jsx`
+- [ ] Renders: scrollable message list, text input, send button
+- [ ] User messages: right-aligned, blue/info background
+- [ ] Assistant messages: left-aligned, grey background
+- [ ] Auto-scroll to bottom on new message: use `useRef` + `scrollIntoView({ behavior: 'smooth' })`
+- [ ] Send button disabled when `aiLoading = true` or input is empty
+- [ ] On Enter key in input: call `onSend`
+- [ ] On send: clear the input field immediately, before AI responds
+- [ ] Loading indicator: animated dots or spinner inside assistant message area when `aiLoading = true`
+
+### 3.12 Escalation.jsx
+
+- [ ] Create `src/components/Escalation.jsx`
+- [ ] Renders: "Generate Escalation Brief" button, brief output area, copy button
+- [ ] Button: red border, red text — visually distinct from other actions
+- [ ] Button disabled when `escalationLoading = true` — show spinner
+- [ ] Brief output: `font-family: monospace`, white-space preserved (`whitespace-pre-wrap`)
+- [ ] Copy button: calls `navigator.clipboard.writeText(escalationBrief)`
+- [ ] Empty state: show description of what the brief contains before first generation
+- [ ] Error state: show error message if brief generation fails
+
+**Phase 3 gate:** Full dashboard renders with real data. All 12 components visible. Scenario dropdown changes displayed values. Risk score updates when simulator sliders move. AIS status dot reflects real connection state.
+
+---
+
+## Phase 4 — MapView Tab
+
+**Goal:** The Live Map tab shows vessel dots on a Leaflet map with zone overlays. Tab switching works cleanly.
+
+**Do this phase last — after the dashboard is fully working.**
+
+### 4.1 Dependency confirmation
+
+- [ ] Confirm `leaflet` and `react-leaflet` are in `package.json` (installed in Phase 0)
+- [ ] Confirm `import 'leaflet/dist/leaflet.css'` is the FIRST import in `main.jsx`
+- [ ] If not: add it now and confirm no existing import comes before it
+
+### 4.2 MapView component
+
+- [ ] Create `src/components/MapView.jsx` — copy the complete file from plan.md section 10.1
+- [ ] Confirm all imports at top of file: `MapContainer, TileLayer, CircleMarker, Rectangle, Popup` from `'react-leaflet'`
+- [ ] Confirm `TERMINAL_ZONES` and `WAITING_ANCHORAGE` are imported from `'../utils/vesselClassifier'`
+
+### 4.3 Wire MapView into App.jsx
+
+- [ ] Import `MapView` in App.jsx
+- [ ] In the App return statement, add the conditional from plan.md section 8:
+  ```jsx
+  {activeTab === 'map' && (
+    <MapView
+      vessels={vessels}
+      metrics={metrics}
+      sim={sim}
+      aisConnected={aisConnected}
+    />
+  )}
+  ```
+- [ ] Ensure the dashboard content is also conditional on `activeTab === 'dashboard'`
+
+### 4.4 Confirm Header tab buttons are wired
+
+- [ ] "Control tower" button calls `onTabChange('dashboard')`
+- [ ] "Live map" button calls `onTabChange('map')`
+- [ ] Active tab button has distinct styling (dark bg, white text)
+- [ ] Inactive tab button has light styling
+
+### 4.5 Map rendering verification
+
+- [ ] Run `npm run dev` locally
+- [ ] Click "Live map" tab
+- [ ] Confirm: map appears centred on Tuas (lat 1.32, lon 103.64) at zoom 12
+- [ ] Confirm: OpenStreetMap tiles load (you should see Singapore coastline and Tuas Port)
+- [ ] Confirm: 5 terminal zone rectangles appear as coloured overlays in the Tuas area
+- [ ] Confirm: anchorage zone appears as a dashed amber rectangle west of the terminals
+- [ ] Confirm: vessel dots appear (may take 30–60 seconds for AIS data)
+- [ ] Click a vessel dot → confirm popup shows name, status, speed, location, MMSI
+- [ ] Click a terminal zone → confirm popup shows terminal name and occupancy %
+- [ ] Click anchorage zone → confirm popup shows waiting vessel count and berth wait
+
+### 4.6 Floating overlay verification
+
+- [ ] Floating stats card is visible in top-right corner
+- [ ] Shows: risk score with correct colour, berth wait hours, inventory days with correct colour
+- [ ] Shows: vessel counts for berthed, waiting, transiting
+- [ ] If AIS offline: shows amber "AIS offline — no vessel data" warning
+
+### 4.7 Legend verification
+
+- [ ] Legend card is visible in bottom-left corner
+- [ ] Shows 5 items: Berthed vessel (green), Waiting vessel (amber), Transiting vessel (grey), Terminal zone (blue), Anchorage zone (amber)
+
+### 4.8 Tab switch verification
+
+- [ ] Switch from map to dashboard: dashboard renders correctly, no blank panels
+- [ ] Switch from dashboard back to map: map is still centred on Tuas, vessel dots still present
+- [ ] Risk badge and AIS status dot in Header are visible on BOTH tabs
+
+### 4.9 Known MapView gotchas — check if anything is broken
+
+- [ ] If map renders as a grey square with no tiles: CSS import is missing in main.jsx
+- [ ] If overlays appear behind map tiles: add `zIndex: 1000` to the overlay div styles
+- [ ] If vessel dots don't update: confirm `vessels` prop is being passed from App.jsx correctly
+- [ ] If map height is 0: confirm `style={{ height: 'calc(100vh - 56px)' }}` is on the wrapper div, not `MapContainer`
+
+**Phase 4 gate:** Live map tab shows tiles, vessel dots, zone overlays, and legend. Tab switching between dashboard and map works without errors. Floating stats overlay shows correct live values.
+
+---
+
+## Phase 5 — AI Integration
+
+**Goal:** ChatBox sends real messages to Anthropic. Responses are parsed and distributed to AgentPanel and Confidence. Escalation generates. Advisory appears.
+
+### 5.1 Replace chat API stub with real implementation
+
+- [ ] Open `api/chat.js`
+- [ ] Replace the stub with the complete implementation from plan.md section 12.1
+- [ ] Paste the FULL system prompt from plan.md section 11.1 as the `SYSTEM_PROMPT` constant
+- [ ] Push to GitHub and wait for Vercel deploy
+- [ ] Test directly via browser console:
+  ```js
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [{ role: 'user', content: 'What is the current situation at Tuas?' }],
+      context: 'Test context — berth wait 28h, risk Critical'
+    })
+  }).then(r => r.json()).then(d => console.log(d.content))
+  ```
+- [ ] Confirm response contains all 5 section headers: `[PORT OPERATIONS]`, `[MARITIME RISK]`, `[INVENTORY]`, `[COST-SERVICE]`, `[INCIDENT COMMANDER]`
+- [ ] Confirm response contains `[CONFIDENCE:` and `[ESCALATION:` lines
+
+### 5.2 Wire ChatBox to handleSend
+
+- [ ] In App.jsx, pass `handleSend` to `ChatBox` as the `onSend` prop
+- [ ] Pass `chatHistory` and `aiLoading` to `ChatBox`
+- [ ] Type a question in the chat and send it
+- [ ] Confirm: user message appears in chat immediately
+- [ ] Confirm: loading indicator appears while AI is responding
+- [ ] Confirm: assistant response appears after AI call completes
+- [ ] Confirm: `aiLoading` resets to `false` after response (even if there's an error)
+
+### 5.3 Wire AgentPanel to parsed response
+
+- [ ] Confirm `handleSend` calls `parseAgentResponse` on the AI response and sets `agentSections`
+- [ ] Pass `agentSections` to `AgentPanel`
+- [ ] Send a question in the chat
+- [ ] Confirm: all 4 agent cards populate with text from the response
+- [ ] Confirm: Incident Commander block shows the commander section text
+- [ ] Confirm: if `escalation.required = true`, red banner appears in Incident Commander block
+
+### 5.4 Wire Confidence to parsed response
+
+- [ ] Pass `agentSections?.confidence` to `Confidence` component
+- [ ] Pass `conflicts` array from App.jsx state to `Confidence`
+- [ ] Confirm: confidence level and reason display after first AI response
+- [ ] Confirm: 5-segment bar fills correctly for High, Medium, Low
+
+### 5.5 Wire Simulator "Ask AI" button
+
+- [ ] Confirm `onAskAI` in Simulator calls `handleSend` with the pre-built message (see plan.md section 7.1 — the Simulator `onAskAI` prop in App.jsx)
+- [ ] Click the button
+- [ ] Confirm: the simulator state is included in the message that goes to the AI
+- [ ] Confirm: AI response references the simulator values (e.g., mentions the berth wait hours you set)
+
+### 5.6 Wire Escalation
+
+- [ ] Pass `handleEscalation` to `Escalation` as `onGenerate`
+- [ ] Pass `escalationBrief` and `escalationLoading`
+- [ ] Click the Generate button
+- [ ] Confirm: brief appears in monospace format
+- [ ] Confirm: brief contains all expected sections (see plan.md section 7.7 for format)
+- [ ] Confirm: copy button copies the text to clipboard
+
+### 5.7 Wire Advisory
+
+- [ ] Confirm `fetchAdvisory` is called after weather loads (in the weather useEffect from plan.md section 7.4)
+- [ ] Pass `advisory` and `advisoryLoading` to `WeatherDetail`
+- [ ] Confirm: advisory text appears in WeatherDetail with `◈ AI-generated` label
+- [ ] Confirm: advisory is NOT re-fetched every render — only every 15 minutes
+
+**Phase 5 gate:** Full AI loop works end-to-end. Chat → AgentPanel → Confidence works. Escalation brief generates correctly. Advisory appears from live weather data.
+
+---
+
+## Phase 6 — Simulator and Live Data Wiring
+
+**Goal:** Simulator overrides correctly interact with live data. Toggle mechanism works. Derived values update correctly.
+
+### 6.1 Berth wait override
+
+- [ ] Note the AIS-derived berth wait value in MetricsBar
+- [ ] Enable the berth wait toggle in Simulator
+- [ ] Drag slider to 36h
+- [ ] Confirm: MetricsBar shows 36h (not the AIS value)
+- [ ] Confirm: risk score increases from the original value
+- [ ] Confirm: live value label "(Live: Xh)" appears next to the slider
+- [ ] Click "Ask AI about this scenario"
+- [ ] Confirm: AI context includes `"Berth wait overridden to 36h (AIS-derived: Xh)"`
+- [ ] Disable the toggle
+- [ ] Confirm: berth wait returns to AIS-derived value and risk score reverts
+
+### 6.2 Weather risk override
+
+- [ ] Note the live weather risk from WeatherDetail (e.g., Medium)
+- [ ] Enable the weather risk toggle in Simulator
+- [ ] Change to High
+- [ ] Confirm: risk score increases
+- [ ] Confirm: live value label shows "(Live: Medium)"
+- [ ] Confirm: conflict flag appears in Confidence: "Weather override (High) conflicts with live data (Medium)"
+
+### 6.3 Scenario switch reset
+
+- [ ] Switch from Typhoon Yagi to Terminal 3 Fire
+- [ ] Confirm: all sliders reset to Terminal 3 Fire defaults
+- [ ] Confirm: all override toggles reset to off
+- [ ] Confirm: risk score recalculates immediately for the new scenario
+- [ ] Confirm: chat history is cleared on scenario switch
+- [ ] Confirm: escalation brief is cleared on scenario switch
+
+### 6.4 Map reflects sim values
+
+- [ ] Switch to Live Map tab
+- [ ] Note the risk score in the floating overlay
+- [ ] Switch back to dashboard and move inventory slider to 1.5 days
+- [ ] Switch to Live Map tab
+- [ ] Confirm: risk score in floating overlay has increased
+- [ ] Confirm: inventory days in floating overlay shows 1.5d in red
+
+**Phase 6 gate:** All simulator overrides interact with live data correctly. Scenario switch resets everything. Map floating overlay reflects current effective values.
+
+---
+
+## Phase 7 — Error Handling and Fallbacks
+
+**Goal:** The app degrades gracefully when external APIs are unreachable. No crashes, no blank screens, no unhandled promise rejections.
+
+### 7.1 AIS offline
+
+- [ ] Temporarily change `VITE_AISSTREAM_KEY` in `.env.local` to an invalid value
+- [ ] Restart dev server
+- [ ] Confirm: AIS status dot turns grey and shows "offline"
+- [ ] Confirm: berth occupancy falls back to scenario defaults (T3 at 100% for Typhoon Yagi)
+- [ ] Confirm: conflict flag "AIS feed offline — using scenario default berth data" appears in Confidence
+- [ ] Confirm: AI context includes "AIS feed offline — scenario defaults in use"
+- [ ] Confirm: map tab shows "AIS offline — no vessel data" in the floating overlay
+- [ ] Confirm: map tab still renders with zone overlays (just no vessel dots)
+- [ ] Restore correct key, restart dev server
+
+### 7.2 Weather stale
+
+- [ ] Temporarily break the `/api/weather` route (add `throw new Error('test')` at the top)
+- [ ] Refresh the app
+- [ ] Confirm: weather cards show amber "Data unavailable" warning
+- [ ] Confirm: `stale: true` appears in weather state (check via React DevTools or console)
+- [ ] Confirm: conflict flag appears in Confidence
+- [ ] Restore the weather route
+
+### 7.3 AI errors
+
+- [ ] Temporarily remove `ANTHROPIC_API_KEY` from Vercel env vars (or set it to invalid)
+- [ ] Deploy and test sending a chat message
+- [ ] Confirm: error message appears in chat: "[ERROR] Unable to reach AI — please try again."
+- [ ] Confirm: `aiLoading` resets to `false` (button becomes clickable again)
+- [ ] Confirm: escalation button shows error state on failure
+- [ ] Restore API key in Vercel
+
+### 7.4 Loading states
+
+- [ ] Confirm AgentPanel shows skeleton while AI is responding
+- [ ] Confirm Escalation button shows spinner while brief is generating
+- [ ] Confirm WeatherDetail shows loading state before first weather fetch completes
+- [ ] Confirm ChatBox send button is disabled during AI response
+
+### 7.5 Null safety
+
+- [ ] Confirm app does not crash when `agentSections = null` (before first AI response)
+- [ ] Confirm app does not crash when `weather = null` (before first weather fetch)
+- [ ] Confirm app does not crash when `vessels = []` (no AIS data yet)
+- [ ] Check browser console — no unhandled promise rejections, no "cannot read property of null" errors
+
+**Phase 7 gate:** All failure modes confirmed. App remains usable and informative in each case. Zero unhandled exceptions in console.
+
+---
+
+## Phase 8 — Polish and Final Deploy
+
+**Goal:** Clean, professional final version deployed. GitHub is ready to submit.
+
+### 8.1 Visual consistency
+
+- [ ] Check all three scenarios — switch between them several times, confirm everything updates
+- [ ] Check risk score badge colour transitions: Low (green) → Medium (amber) → High (orange) → Critical (red)
+- [ ] Check all data source labels are visible: ● Live, ~ Simulated, ◈ AI-generated
+- [ ] Check escalation brief is formatted correctly in monospace, all sections present
+- [ ] Check Simulator live value labels appear when toggles are on
+- [ ] Check tab switcher active state is visually distinct
+
+### 8.2 Map final checks
+
+- [ ] Map is centred on Tuas at correct zoom
+- [ ] All 5 terminal zones visible with correct colours
+- [ ] Anchorage zone visible with dashed border
+- [ ] Vessel popup shows all 5 fields: name, status, speed, location, MMSI
+- [ ] Zone popups show occupancy percentage
+- [ ] Legend is readable and accurate
+- [ ] Floating overlay updates when switching from dashboard after changing simulator values
+
+### 8.3 Layout check
+
+- [ ] No horizontal overflow at 1440px viewport width
+- [ ] No horizontal overflow at 1280px viewport width
+- [ ] No component overflows its card at any reasonable content length
+
+### 8.4 GitHub cleanup
+
+- [ ] Run `git status` — confirm `.env.local` is NOT shown
+- [ ] Run `git status` — confirm `node_modules` is NOT shown
+- [ ] Confirm no hardcoded API keys anywhere in source files (search for your actual key strings)
+- [ ] Create `README.md` with:
+  - Project name and description (1–2 sentences)
+  - Tech stack list
+  - How to run locally (clone, npm install, add .env.local, npm run dev)
+  - Environment variables required (names only, not values)
+  - Vercel deployment URL
+- [ ] Final commit: `git add . && git commit -m "feat: PortSentinel AI complete — all phases"` 
+- [ ] `git push origin main`
+
+### 8.5 Final Vercel deploy verification
+
+- [ ] Push triggers automatic Vercel deploy — confirm it succeeds
+- [ ] Visit live Vercel URL — confirm app loads without errors
+- [ ] Confirm AIS stream connects on the deployed URL (not just localhost)
+- [ ] Confirm all 3 API routes work on deployed URL: `/api/weather`, `/api/news`, `/api/chat`
+- [ ] Test all 3 scenarios on deployed URL
+- [ ] Test full chat loop on deployed URL — send a message, confirm structured response
+- [ ] Test escalation brief on deployed URL
+- [ ] Test "Live map" tab on deployed URL — confirm tiles load, vessel dots appear
+- [ ] Copy the final Vercel URL — this is your submission link
+
+### 8.6 Final checklist before submission
+
+- [ ] Risk score formula weights visible in the UI (footer of RiskBreakdown or Simulator)
+- [ ] All data source labels present and accurate on dashboard
+- [ ] Confidence indicator updates after every AI response
+- [ ] Conflict flags appear when expected (test by enabling a weather override that differs from live)
+- [ ] Escalation brief copy button works
+- [ ] Tab switching works with no console errors
+- [ ] GitHub repo link is accessible (set to public if not already)
+
+---
+
+## Known Risks and Mitigations
+
+| Risk | Likelihood | Mitigation |
+|---|---|---|
+| AIS shows fewer than 5 vessels | Medium | Widen bounding box by 0.05 degrees; scenario defaults cover it; document in reflection |
+| Terminal zone boundaries don't match actual Tuas layout | High | Zone coords are in a config object — tune without touching logic; confirm visually on map |
+| Leaflet CSS missing → map renders grey | Medium | Confirmed in Phase 0 checklist; `main.jsx` import is first step |
+| `MapContainer` height 0 → blank area | Medium | Wrapper div needs `height: calc(100vh - 56px)`, not MapContainer itself |
+| Currents API returns no maritime news | Medium | Hide ticker if empty; don't crash |
+| Anthropic API slow → chat feels unresponsive | Low | `max_tokens: 1000` keeps responses fast; show loading state clearly |
+| AIS WebSocket key visible in browser bundle | Certain | Known trade-off — document in reflection report |
+| Vercel cold start on first API call | Low | First response may be 2–3s slower; subsequent calls are fast |
+
+---
+
+## Reflection Report Notes — Collect These During Build
+
+Write these down as they happen. Do not try to reconstruct from memory at the end.
+
+- [ ] Note: how many vessels actually appeared in your AIS bounding box, and what time of day — this tells you something real about Tuas traffic patterns
+- [ ] Note: any case where the AI gave an overconfident or wrong recommendation — this is your hallucination risk example
+- [ ] Note: a moment where the deterministic risk score and the AI's recommendation disagreed — why they diverged
+- [ ] Note: what happens to AI confidence level when you activate conflicting weather/AIS overrides — this is the human escalation argument
+- [ ] Note: the AIS coverage limitation (vessels with disabled transponders, small craft) — link this to why the escalation feature exists
+- [ ] Note: what data you would add if this were a real production system — MPA berth management API, ERP inventory feed, carrier ETD/ETA API, Lloyd's maritime intelligence feed
+
+---
+
+*Progress tracker version 2.0 — includes MapView tab (Phase 4)*
