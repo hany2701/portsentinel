@@ -6,24 +6,25 @@ import { calcRiskScore } from './utils/riskScore'
 import { mapWeatherRisk } from './utils/weatherMapper'
 import { buildContext } from './utils/contextBuilder'
 import { parseAgentResponse } from './utils/responseParser'
+import Header from './components/Header'
+import MetricsBar from './components/MetricsBar'
+import TerminalChart from './components/TerminalChart'
+import RiskBreakdown from './components/RiskBreakdown'
+import WeatherDetail from './components/WeatherDetail'
+import Simulator from './components/Simulator'
+import AgentPanel from './components/AgentPanel'
+import TradeoffTable from './components/TradeoffTable'
+import ChatBox from './components/ChatBox'
+import Confidence from './components/Confidence'
+import Escalation from './components/Escalation'
 
 export default function App() {
-  // --- AIS ---
   const { vessels, connected: aisConnected } = useAISStream()
-
-  // --- Tab routing ---
   const [activeTab, setActiveTab] = useState('dashboard')
-
-  // --- Weather ---
   const [weather, setWeather] = useState(null)
-
-  // --- News ---
   const [news, setNews] = useState([])
-
-  // --- Active scenario ---
   const [activeScenario, setActiveScenario] = useState('Typhoon Yagi')
 
-  // --- Simulator overrides ---
   const [sim, setSim] = useState({
     berthWaitEnabled:   false,
     berthWait:          28,
@@ -34,7 +35,6 @@ export default function App() {
     rerouteCost:        'Medium'
   })
 
-  // --- Derived metrics ---
   const [metrics, setMetrics] = useState({
     berthOccupancy:       { T1: 0, T2: 0, T3: 0, T4: 0, T5: 0 },
     waitingCount:         0,
@@ -48,30 +48,18 @@ export default function App() {
     riskComponents:       { portScore: 0, weatherScore: 0, invScore: 0, urgencyScore: 0 }
   })
 
-  // --- Conflict flags ---
   const [conflicts, setConflicts] = useState([])
-
-  // --- Chat ---
   const [chatHistory, setChatHistory] = useState([])
-
-  // --- AI agent response ---
   const [agentSections, setAgentSections] = useState(null)
-
-  // --- Loading flags ---
   const [aiLoading, setAiLoading] = useState(false)
   const [escalationLoading, setEscalationLoading] = useState(false)
   const [advisoryLoading, setAdvisoryLoading] = useState(false)
-
-  // --- Escalation brief ---
   const [escalationBrief, setEscalationBrief] = useState(null)
-
-  // --- Background AI advisory ---
   const [advisory, setAdvisory] = useState(null)
 
-  // --- Central derived metrics effect ---
+  // Central derived metrics
   useEffect(() => {
     const scenario = SCENARIOS[activeScenario]
-
     const berthOccupancy =
       aisConnected && vessels.filter(v => v.status === 'berthed').length > 3
         ? calcBerthOccupancy(vessels)
@@ -80,77 +68,41 @@ export default function App() {
     const waitMetrics =
       aisConnected && vessels.length > 0
         ? calcWaitMetrics(vessels)
-        : {
-            waitingCount: scenario.defaultWaitingCount,
-            estimatedWaitHours: scenario.berthWait,
-            waitingVessels: scenario.defaultWaitingVesselNames
-          }
+        : { waitingCount: scenario.defaultWaitingCount, estimatedWaitHours: scenario.berthWait, waitingVessels: scenario.defaultWaitingVesselNames }
 
-    const effectiveBerthWait = sim.berthWaitEnabled
-      ? sim.berthWait
-      : waitMetrics.estimatedWaitHours
-
-    const liveWeatherRisk = weather
-      ? mapWeatherRisk(weather.strait.wind_kmh, weather.strait.wave_m)
-      : 'Unknown'
-
-    const effectiveWeatherRisk = sim.weatherRiskEnabled
-      ? sim.weatherRisk
-      : liveWeatherRisk
+    const effectiveBerthWait = sim.berthWaitEnabled ? sim.berthWait : waitMetrics.estimatedWaitHours
+    const liveWeatherRisk = weather ? mapWeatherRisk(weather.strait.wind_kmh, weather.strait.wave_m) : 'Unknown'
+    const effectiveWeatherRisk = sim.weatherRiskEnabled ? sim.weatherRisk : liveWeatherRisk
 
     const { total, level, portScore, weatherScore, invScore, urgencyScore } = calcRiskScore({
-      berthWait: effectiveBerthWait,
-      weatherRisk: effectiveWeatherRisk,
-      inventoryDays: sim.inventoryDays,
-      cargoUrgency: sim.cargoUrgency
+      berthWait: effectiveBerthWait, weatherRisk: effectiveWeatherRisk,
+      inventoryDays: sim.inventoryDays, cargoUrgency: sim.cargoUrgency
     })
 
     const newConflicts = []
-    if (!aisConnected)
-      newConflicts.push('AIS feed offline — using scenario default berth data')
-    if (weather?.stale)
-      newConflicts.push('Weather feed stale — API unreachable, showing last known values')
+    if (!aisConnected) newConflicts.push('AIS feed offline — using scenario default berth data')
+    if (weather?.stale) newConflicts.push('Weather feed stale — API unreachable, showing last known values')
     if (sim.weatherRiskEnabled && weather && liveWeatherRisk !== sim.weatherRisk)
       newConflicts.push(`Weather override (${sim.weatherRisk}) conflicts with live data (${liveWeatherRisk})`)
     if (sim.berthWaitEnabled && aisConnected) {
       const diff = Math.abs(sim.berthWait - waitMetrics.estimatedWaitHours)
-      if (diff > 8)
-        newConflicts.push(`Simulated berth wait (${sim.berthWait}h) differs from AIS-derived (${waitMetrics.estimatedWaitHours}h) by ${diff}h`)
+      if (diff > 8) newConflicts.push(`Simulated berth wait (${sim.berthWait}h) differs from AIS-derived (${waitMetrics.estimatedWaitHours}h) by ${diff}h`)
     }
 
-    setMetrics({
-      berthOccupancy,
-      ...waitMetrics,
-      effectiveBerthWait,
-      liveWeatherRisk,
-      effectiveWeatherRisk,
-      riskScore: total,
-      riskLevel: level,
-      riskComponents: { portScore, weatherScore, invScore, urgencyScore }
-    })
-
+    setMetrics({ berthOccupancy, ...waitMetrics, effectiveBerthWait, liveWeatherRisk, effectiveWeatherRisk, riskScore: total, riskLevel: level, riskComponents: { portScore, weatherScore, invScore, urgencyScore } })
     setConflicts(newConflicts)
-
   }, [vessels, weather, sim, activeScenario, aisConnected])
 
-  // --- Scenario change effect ---
+  // Scenario change reset
   useEffect(() => {
     const scenario = SCENARIOS[activeScenario]
-    setSim({
-      berthWaitEnabled:   false,
-      berthWait:          scenario.berthWait,
-      weatherRiskEnabled: false,
-      weatherRisk:        'Low',
-      inventoryDays:      scenario.inventoryDays,
-      cargoUrgency:       scenario.cargoUrgency,
-      rerouteCost:        scenario.rerouteCost
-    })
+    setSim({ berthWaitEnabled: false, berthWait: scenario.berthWait, weatherRiskEnabled: false, weatherRisk: 'Low', inventoryDays: scenario.inventoryDays, cargoUrgency: scenario.cargoUrgency, rerouteCost: scenario.rerouteCost })
     setEscalationBrief(null)
     setAgentSections(null)
     setChatHistory([])
   }, [activeScenario])
 
-  // --- Weather fetch effect ---
+  // Weather fetch
   useEffect(() => {
     async function fetchWeather() {
       try {
@@ -168,54 +120,41 @@ export default function App() {
     return () => clearInterval(interval)
   }, [])
 
-  // --- News fetch effect ---
+  // News fetch
   useEffect(() => {
     async function fetchNews() {
       try {
         const res = await fetch('/api/news')
         const data = await res.json()
         setNews(data.articles ?? [])
-      } catch {
-        // silent fail
-      }
+      } catch { /* silent fail */ }
     }
     fetchNews()
     const interval = setInterval(fetchNews, 30 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
 
-  // --- Chat send handler ---
   async function handleSend(userMessage) {
     const userMsg = { role: 'user', content: userMessage }
     setChatHistory(prev => [...prev, userMsg])
     setAiLoading(true)
-
     try {
       const context = buildContext(metrics, sim, weather, vessels, activeScenario)
       const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [...chatHistory, userMsg],
-          context
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [...chatHistory, userMsg], context })
       })
       const data = await res.json()
-      const assistantContent = data.content
-      const parsed = parseAgentResponse(assistantContent)
+      const parsed = parseAgentResponse(data.content)
       setAgentSections(parsed)
-      setChatHistory(prev => [...prev, { role: 'assistant', content: assistantContent }])
+      setChatHistory(prev => [...prev, { role: 'assistant', content: data.content }])
     } catch {
-      setChatHistory(prev => [...prev, {
-        role: 'assistant',
-        content: '[ERROR] Unable to reach AI — please try again.'
-      }])
+      setChatHistory(prev => [...prev, { role: 'assistant', content: '[ERROR] Unable to reach AI — please try again.' }])
     } finally {
       setAiLoading(false)
     }
   }
 
-  // --- Escalation handler ---
   async function handleEscalation() {
     setEscalationLoading(true)
     try {
@@ -257,12 +196,8 @@ ACTIONS REQUIRED FROM DIRECTOR
 — End of brief —`
 
       const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: escalationPrompt }],
-          context
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: escalationPrompt }], context })
       })
       const data = await res.json()
       setEscalationBrief(data.content)
@@ -273,40 +208,90 @@ ACTIONS REQUIRED FROM DIRECTOR
     }
   }
 
-  // --- Advisory fetch ---
   async function fetchAdvisory(weatherData) {
     setAdvisoryLoading(true)
     try {
       const res = await fetch('/api/advisory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          wind_kmh: weatherData.strait.wind_kmh,
-          wave_m: weatherData.strait.wave_m,
-          swell_m: weatherData.strait.swell_m,
-          sg_wind_kmh: weatherData.sg.wind_kmh
-        })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wind_kmh: weatherData.strait.wind_kmh, wave_m: weatherData.strait.wave_m, swell_m: weatherData.strait.swell_m, sg_wind_kmh: weatherData.sg.wind_kmh })
       })
       const data = await res.json()
       setAdvisory(data.advisory)
-    } catch {
-      // silent fail
-    } finally {
-      setAdvisoryLoading(false)
-    }
+    } catch { /* silent fail */ }
+    finally { setAdvisoryLoading(false) }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-800">PortSentinel AI</h1>
-        <p className="mt-2 text-sm text-gray-500">
-          Risk score: <strong>{metrics.riskScore}</strong> — {metrics.riskLevel}
-        </p>
-        <p className="text-sm text-gray-500">
-          Scenario: {activeScenario} | AIS: {aisConnected ? 'connected' : 'offline'} ({vessels.length} vessels)
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        activeScenario={activeScenario}
+        onScenarioChange={setActiveScenario}
+        riskLevel={metrics.riskLevel}
+        riskScore={metrics.riskScore}
+        aisConnected={aisConnected}
+      />
+
+      {activeTab === 'dashboard' ? (
+        <main className="p-4 space-y-4">
+          <MetricsBar metrics={metrics} sim={sim} weather={weather} />
+
+          <div className="grid grid-cols-3 gap-4">
+            <TerminalChart
+              berthOccupancy={metrics.berthOccupancy}
+              waitingVessels={metrics.waitingVessels}
+              waitingCount={metrics.waitingCount}
+              aisConnected={aisConnected}
+            />
+            <RiskBreakdown
+              riskComponents={metrics.riskComponents}
+              riskScore={metrics.riskScore}
+              riskLevel={metrics.riskLevel}
+            />
+            <WeatherDetail weather={weather} advisory={advisory} advisoryLoading={advisoryLoading} />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <Simulator
+              sim={sim}
+              onSimChange={(key, val) => setSim(prev => ({ ...prev, [key]: val }))}
+              metrics={metrics}
+              onAskAI={() => handleSend(
+                `Based on current simulator settings — berth wait ${metrics.effectiveBerthWait}h, ` +
+                `weather ${metrics.effectiveWeatherRisk}, inventory ${sim.inventoryDays} days, ` +
+                `urgency ${sim.cargoUrgency} — provide your full assessment and recommendation.`
+              )}
+            />
+            <AgentPanel agentSections={agentSections} aiLoading={aiLoading} />
+            <div className="space-y-4">
+              <TradeoffTable
+                riskScore={metrics.riskScore}
+                riskLevel={metrics.riskLevel}
+                rerouteCost={sim.rerouteCost}
+                inventoryDays={sim.inventoryDays}
+                cargoUrgency={sim.cargoUrgency}
+              />
+              <Confidence confidence={agentSections?.confidence ?? null} conflicts={conflicts} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <ChatBox chatHistory={chatHistory} onSend={handleSend} aiLoading={aiLoading} />
+            </div>
+            <Escalation
+              onGenerate={handleEscalation}
+              escalationBrief={escalationBrief}
+              escalationLoading={escalationLoading}
+            />
+          </div>
+        </main>
+      ) : (
+        <div className="flex items-center justify-center h-96">
+          <p className="text-gray-400 text-sm">Live map — coming in Phase 4</p>
+        </div>
+      )}
     </div>
   )
 }
