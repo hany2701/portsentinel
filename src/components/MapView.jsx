@@ -16,8 +16,8 @@ export default function MapView({ vessels, metrics, sim, aisConnected }) {
   return (
     <div style={{ position: 'relative', height: 'calc(100vh - 56px)' }}>
       <MapContainer
-        center={[1.32, 103.64]}
-        zoom={12}
+        center={[1.245, 103.635]}
+        zoom={13}
         style={{ height: '100%', width: '100%' }}
         zoomControl={true}
       >
