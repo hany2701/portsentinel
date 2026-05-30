@@ -1,5 +1,24 @@
 import { useRef, useEffect, useState } from 'react'
 
+function formatAssistantMessage(text) {
+  return text.split('\n').map((line, i) => {
+    if (!line.trim()) return <div key={i} style={{ height: 4 }} />
+    if (/^\[[A-Z][A-Z\s\-]+\]$/.test(line)) {
+      return (
+        <div key={i} className="text-xs font-semibold text-blue-700 uppercase tracking-wide mt-3 first:mt-0">
+          {line.slice(1, -1)}
+        </div>
+      )
+    }
+    if (/^\[.+\]$/.test(line)) {
+      return (
+        <div key={i} className="text-xs text-gray-500 border-t border-gray-200 pt-2 mt-2">{line}</div>
+      )
+    }
+    return <p key={i} className="text-xs text-gray-700 leading-relaxed">{line}</p>
+  })
+}
+
 export default function ChatBox({ chatHistory, onSend, aiLoading }) {
   const [input, setInput] = useState('')
   const bottomRef = useRef(null)
@@ -34,12 +53,12 @@ export default function ChatBox({ chatHistory, onSend, aiLoading }) {
         )}
         {chatHistory.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-3 py-2 rounded-lg text-xs leading-relaxed ${
+            <div className={`max-w-[85%] px-3 py-2 rounded-lg ${
               msg.role === 'user'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600 text-white text-xs leading-relaxed'
                 : 'bg-gray-100 text-gray-800'
             }`}>
-              {msg.content}
+              {msg.role === 'user' ? msg.content : formatAssistantMessage(msg.content)}
             </div>
           </div>
         ))}
