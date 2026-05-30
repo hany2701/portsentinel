@@ -23,13 +23,21 @@ function SourceTag({ label }) {
   if (!label) return null
   if (label.startsWith('○')) {
     return (
-      <span className="flex items-center gap-1 text-xs text-red-500">
+      <span className="flex items-center gap-1 text-xs text-red-500 font-medium">
         <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
         AIS offline
       </span>
     )
   }
-  return <span className="text-xs text-gray-400">{label}</span>
+  if (label.startsWith('●')) {
+    return (
+      <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
+        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+        {label.replace('● ', '')}
+      </span>
+    )
+  }
+  return <span className="text-xs text-gray-900">{label.replace(/^[~◈—]\s*/, '')}</span>
 }
 
 export default function MetricsBar({ metrics, sim, weather, berthWaitLabel, weatherLabel }) {

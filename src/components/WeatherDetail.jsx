@@ -27,7 +27,10 @@ export default function WeatherDetail({ weather, isLiveMode, scenarioWeather, ad
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-semibold text-gray-800">Weather — Shipping Lanes</span>
-        <span className="text-xs text-gray-400">{sourceLabel}</span>
+        {isLiveMode
+          ? <span className="flex items-center gap-1 text-xs text-green-600 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse flex-shrink-0" />Live</span>
+          : <span className="text-xs text-gray-900">Scenario</span>
+        }
       </div>
 
       <div className="space-y-2 mb-3">

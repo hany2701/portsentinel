@@ -61,7 +61,9 @@ export default function Header({ activeTab, onTabChange, activeScenario, onScena
 
       <div className="flex items-center gap-1.5">
         <div className={`w-2 h-2 rounded-full ${aisConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-        <span className="text-xs text-gray-500">{aisConnected ? 'AIS live' : 'AIS offline'}</span>
+        <span className={`text-xs font-medium ${aisConnected ? 'text-green-600' : 'text-red-500'}`}>
+          {aisConnected ? 'AIS live' : 'AIS offline'}
+        </span>
       </div>
 
       <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${riskBadgeStyle}`}>
