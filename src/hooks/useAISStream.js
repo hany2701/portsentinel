@@ -15,7 +15,6 @@ export function useAISStream() {
       ws.current = new WebSocket(WS_URL)
 
       ws.current.onopen = () => {
-        setConnected(true)
         ws.current.send(JSON.stringify({
           Apikey: import.meta.env.VITE_AISSTREAM_KEY,
           BoundingBoxes: [[[1.15, 103.45], [1.45, 103.85]]],
@@ -77,6 +76,7 @@ export function useAISStream() {
           }
         }
 
+        setConnected(true)
         setVessels(Object.values(vesselMap.current))
       }
 

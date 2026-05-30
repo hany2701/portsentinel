@@ -19,6 +19,19 @@ function riskColor(s) {
   return 'bg-green-500'
 }
 
+function SourceTag({ label }) {
+  if (!label) return null
+  if (label.startsWith('○')) {
+    return (
+      <span className="flex items-center gap-1 text-xs text-red-500">
+        <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+        AIS offline
+      </span>
+    )
+  }
+  return <span className="text-xs text-gray-400">{label}</span>
+}
+
 export default function MetricsBar({ metrics, sim, weather, berthWaitLabel, weatherLabel }) {
   const wrisk = metrics.effectiveWeatherRisk
   const wriskPct = wrisk === 'High' ? 100 : wrisk === 'Medium' ? 55 : 20
@@ -64,7 +77,7 @@ export default function MetricsBar({ metrics, sim, weather, berthWaitLabel, weat
         <div key={c.label} className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500">{c.label}</span>
-            <span className="text-xs text-gray-400">{c.source}</span>
+            <SourceTag label={c.source} />
           </div>
           <div className="text-2xl font-bold text-gray-900 mb-2">{c.value}</div>
           <div className="w-full h-1.5 bg-gray-100 rounded-full mb-2">

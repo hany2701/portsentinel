@@ -12,7 +12,10 @@ export default function TerminalChart({ berthOccupancy, waitingVessels, waitingC
     <div className="bg-white border border-gray-200 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-semibold text-gray-800">Terminal occupancy</span>
-        <span className="text-xs text-gray-400">{sourceLabel ?? (aisConnected ? '● Live (AIS)' : '~ Scenario defaults')}</span>
+        {sourceLabel?.startsWith('○')
+          ? <span className="flex items-center gap-1 text-xs text-red-500"><span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />AIS offline</span>
+          : <span className="text-xs text-gray-400">{sourceLabel ?? (aisConnected ? '● Live (AIS)' : '~ Scenario defaults')}</span>
+        }
       </div>
 
       <div className="space-y-2.5">

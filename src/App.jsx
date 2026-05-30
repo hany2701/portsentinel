@@ -235,7 +235,7 @@ ACTIONS REQUIRED FROM DIRECTOR
   const isLiveMode = SCENARIOS[activeScenario]?.liveMode === true
 
   const occupancySourceLabel = isLiveMode
-    ? (aisConnected ? '● Live (AIS)' : '⚠ AIS offline')
+    ? (aisConnected ? '● Live (AIS)' : '○ AIS offline')
     : aisConnected && vessels.filter(v => v.status === 'berthed').length > 3
       ? '● Live (AIS)'
       : '~ Scenario defaults'
@@ -243,7 +243,7 @@ ACTIONS REQUIRED FROM DIRECTOR
   const berthWaitLabel = sim.berthWaitEnabled
     ? '~ Simulated'
     : isLiveMode
-      ? (aisConnected ? '● Live (AIS)' : '⚠ AIS offline')
+      ? (aisConnected ? '● Live (AIS)' : '○ AIS offline')
       : '~ Scenario defaults'
 
   const weatherLabel = sim.weatherRiskEnabled
