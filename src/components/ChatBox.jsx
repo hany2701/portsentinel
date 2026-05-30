@@ -42,7 +42,7 @@ export default function ChatBox({ chatHistory, onSend, aiLoading }) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg flex flex-col h-80">
+    <div className="bg-white border border-gray-200 rounded-lg flex flex-col h-full">
       <div className="px-4 py-2.5 border-b border-gray-100">
         <span className="text-sm font-semibold text-gray-800">AI Chat</span>
       </div>

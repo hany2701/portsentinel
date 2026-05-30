@@ -265,63 +265,68 @@ ACTIONS REQUIRED FROM DIRECTOR
       />
 
       {activeTab === 'dashboard' ? (
-        <main className="p-4 space-y-4">
-          <MetricsBar
-            metrics={metrics}
-            sim={sim}
-            weather={weather}
-            berthWaitLabel={berthWaitLabel}
-            weatherLabel={weatherLabel}
-          />
+        <div className="flex gap-4 p-4 h-[calc(100vh-56px)]">
 
-          <div className="grid grid-cols-3 gap-4">
-            <TerminalChart
-              berthOccupancy={metrics.berthOccupancy}
-              waitingVessels={metrics.waitingVessels}
-              waitingCount={metrics.waitingCount}
-              aisConnected={aisConnected}
-              sourceLabel={occupancySourceLabel}
-            />
-            <RiskBreakdown
-              riskComponents={metrics.riskComponents}
-              riskScore={metrics.riskScore}
-              riskLevel={metrics.riskLevel}
-            />
-            <WeatherDetail
-              weather={weather}
-              isLiveMode={isLiveMode}
-              scenarioWeather={isLiveMode ? null : SCENARIOS[activeScenario].scenarioWeather}
-              advisory={advisory}
-              advisoryLoading={advisoryLoading}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <Simulator
-              sim={sim}
-              onSimChange={(key, val) => setSim(prev => ({ ...prev, [key]: val }))}
+          {/* Left column — dashboard panels */}
+          <div className="flex-1 min-w-0 overflow-y-auto space-y-4 pr-1">
+            <MetricsBar
               metrics={metrics}
-              onAskAI={() => handleSend(
-                `Based on current simulator settings — berth wait ${metrics.effectiveBerthWait}h, ` +
-                `weather ${metrics.effectiveWeatherRisk}, inventory ${sim.inventoryDays} days, ` +
-                `urgency ${sim.cargoUrgency} — provide your full assessment and recommendation.`
-              )}
+              sim={sim}
+              weather={weather}
+              berthWaitLabel={berthWaitLabel}
+              weatherLabel={weatherLabel}
             />
-            <AgentPanel agentSections={agentSections} aiLoading={aiLoading} />
-            <div className="space-y-4">
-              <TradeoffTable
+
+            <div className="grid grid-cols-3 gap-4">
+              <TerminalChart
+                berthOccupancy={metrics.berthOccupancy}
+                waitingVessels={metrics.waitingVessels}
+                waitingCount={metrics.waitingCount}
+                aisConnected={aisConnected}
+                sourceLabel={occupancySourceLabel}
+              />
+              <RiskBreakdown
+                riskComponents={metrics.riskComponents}
                 riskScore={metrics.riskScore}
                 riskLevel={metrics.riskLevel}
-                rerouteCost={sim.rerouteCost}
-                inventoryDays={sim.inventoryDays}
-                cargoUrgency={sim.cargoUrgency}
               />
-              <Confidence confidence={agentSections?.confidence ?? null} conflicts={conflicts} />
+              <WeatherDetail
+                weather={weather}
+                isLiveMode={isLiveMode}
+                scenarioWeather={isLiveMode ? null : SCENARIOS[activeScenario].scenarioWeather}
+                advisory={advisory}
+                advisoryLoading={advisoryLoading}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <Simulator
+                sim={sim}
+                onSimChange={(key, val) => setSim(prev => ({ ...prev, [key]: val }))}
+                metrics={metrics}
+                onAskAI={() => handleSend(
+                  `Based on current simulator settings — berth wait ${metrics.effectiveBerthWait}h, ` +
+                  `weather ${metrics.effectiveWeatherRisk}, inventory ${sim.inventoryDays} days, ` +
+                  `urgency ${sim.cargoUrgency} — provide your full assessment and recommendation.`
+                )}
+              />
+              <AgentPanel agentSections={agentSections} aiLoading={aiLoading} />
+              <div className="space-y-4">
+                <TradeoffTable
+                  riskScore={metrics.riskScore}
+                  riskLevel={metrics.riskLevel}
+                  rerouteCost={sim.rerouteCost}
+                  inventoryDays={sim.inventoryDays}
+                  cargoUrgency={sim.cargoUrgency}
+                />
+                <Confidence confidence={agentSections?.confidence ?? null} conflicts={conflicts} />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
+          {/* Right column — chat + escalation */}
+          <div className="w-80 shrink-0 flex flex-col gap-4">
+            <div className="flex-1 min-h-0">
               <ChatBox chatHistory={chatHistory} onSend={handleSend} aiLoading={aiLoading} />
             </div>
             <Escalation
@@ -330,7 +335,8 @@ ACTIONS REQUIRED FROM DIRECTOR
               escalationLoading={escalationLoading}
             />
           </div>
-        </main>
+
+        </div>
       ) : (
         <MapView
           vessels={vessels}
