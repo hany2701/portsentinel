@@ -11,7 +11,6 @@ touches the simulation.
 
 - Blueprint and full decision log (D-01..D-73): [plan.md](plan.md)
 - Build tracker with per-phase gate evidence: [progress.md](progress.md)
-- 6-minute storm-arc walkthrough: [docs/demo-script.md](docs/demo-script.md)
 
 ## Running it
 
