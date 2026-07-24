@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700" font-family="system-ui, sans-serif">
+  <!-- INT-2 Tuas Spatial Twin — LAYOUT SCAFFOLD preview (D-61, authoritative scaffold).
+       Reproduces the owner's authoritative layout scaffold: one continuous teal
+       landmass (fingers = solid land, basins = open white water between them);
+       F1–F3 equal-length modular fingers; F4 = single 5-sided pentagon (longest,
+       broad base, SE taper); 8 yard blocks + 3 gates on the inland platform; one
+       vertical AGV spine + horizontal branches into every finger + yard-grid lanes;
+       B1–B12 berth/crane positions along the quay faces.
+       Rectangles/colours are PLACEHOLDERS for placement only — the production build
+       reuses the repo's real components (YB-*, B1–B12, cranes, AGV, gate, styling).
+       Frame: X east(+) right, Z north(-) up. Not production code. -->
+
+  <!-- water (background) -->
+  <rect x="0" y="0" width="900" height="700" fill="#e6eef5"/>
+
+  <!-- ============ one continuous reclaimed landmass (teal) ============ -->
+  <!-- comb: inland platform x40–300, fingers F1–F3 tip x620, F4 pentagon to x760 -->
+  <!-- F4 (P1..P5): straight top P1(300,525)->P2(760,525); short outer-right edge
+       P2->P3(760,590); diagonal P3->P4 apex(560,665, right of centre); diagonal
+       P4->P5(300,635); then a FLAT backland bottom P5->(40,635) that keeps the
+       inland platform (YB-H/YB-D) intact — taper stays east of the finger root. -->
+  <path d="M40,30 L620,30 L620,150 L300,150 L300,195 L620,195
+           L620,315 L300,315 L300,360 L620,360
+           L620,480 L300,480 L300,525 L760,525
+           L760,590 L560,665 L300,635 L40,635 Z"
+        fill="#1f6f8b" stroke="#0d3a4a" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- ============ AGV network (green) ============ -->
+  <g stroke="#2f9e44" stroke-width="9" stroke-linecap="butt" fill="none">
+    <!-- main vertical spine at the finger roots -->
+    <line x1="300" y1="34" x2="300" y2="632"/>
+    <!-- horizontal branch into every finger -->
+    <line x1="300" y1="90"  x2="600" y2="90"/>
+    <line x1="300" y1="255" x2="600" y2="255"/>
+    <line x1="300" y1="420" x2="600" y2="420"/>
+    <line x1="300" y1="588" x2="740" y2="588"/>
+    <!-- inland yard grid: two vertical lanes + row lanes + top lane -->
+    <line x1="97"  y1="40" x2="97"  y2="622"/>
+    <line x1="268" y1="40" x2="268" y2="622"/>
+    <line x1="97"  y1="45"  x2="268" y2="45"/>
+    <line x1="97"  y1="170" x2="268" y2="170"/>
+    <line x1="97"  y1="335" x2="268" y2="335"/>
+    <line x1="97"  y1="500" x2="268" y2="500"/>
+  </g>
+
+  <!-- ============ inland yard blocks (8, placeholders w/ real IDs) ============ -->
+  <g>
+    <!-- east column (nearer quay): YB-A..YB-D ; west column: YB-E..YB-H -->
+    <g fill="#e07a1f" stroke="#8a4a10" stroke-width="1.5">
+      <rect x="188" y="62"  width="60" height="60" rx="3"/> <!-- YB-A -->
+      <rect x="118" y="62"  width="60" height="60" rx="3"/> <!-- YB-E -->
+      <rect x="188" y="225" width="60" height="60" rx="3"/> <!-- YB-B -->
+      <rect x="118" y="225" width="60" height="60" rx="3"/> <!-- YB-F -->
+      <rect x="188" y="390" width="60" height="60" rx="3"/> <!-- YB-C -->
+      <rect x="118" y="390" width="60" height="60" rx="3"/> <!-- YB-G -->
+      <rect x="188" y="558" width="60" height="60" rx="3"/> <!-- YB-D -->
+      <rect x="118" y="558" width="60" height="60" rx="3"/> <!-- YB-H -->
+    </g>
+    <g font-size="11" font-weight="700" fill="#3a1f08" text-anchor="middle">
+      <text x="218" y="96">YB-A</text><text x="148" y="96">YB-E</text>
+      <text x="218" y="259">YB-B</text><text x="148" y="259">YB-F</text>
+      <text x="218" y="424">YB-C</text><text x="148" y="424">YB-G</text>
+      <text x="218" y="592">YB-D</text><text x="148" y="592">YB-H</text>
+    </g>
+  </g>
+
+  <!-- ============ gates (3, west edge placeholders) ============ -->
+  <g fill="#e07a1f" stroke="#8a4a10" stroke-width="1.5">
+    <rect x="48" y="120" width="42" height="46" rx="3"/>
+    <rect x="48" y="285" width="42" height="46" rx="3"/>
+    <rect x="48" y="450" width="42" height="46" rx="3"/>
+  </g>
+  <g font-size="9.5" font-weight="700" fill="#eaf3f8" text-anchor="middle">
+    <text x="69" y="147">GATE</text><text x="69" y="312">GATE</text><text x="69" y="477">GATE</text>
+  </g>
+
+  <!-- ============ berth / crane positions (B1–B12) along quay faces ============ -->
+  <g>
+    <g fill="#f2d024" stroke="#8a6d00" stroke-width="1.3">
+      <!-- F1: B1,B2 top face · B3 bottom face -->
+      <rect x="360" y="35"  width="52" height="13" rx="4"/><rect x="500" y="35"  width="52" height="13" rx="4"/><rect x="430" y="137" width="52" height="13" rx="4"/>
+      <!-- F2 -->
+      <rect x="360" y="200" width="52" height="13" rx="4"/><rect x="500" y="200" width="52" height="13" rx="4"/><rect x="430" y="302" width="52" height="13" rx="4"/>
+      <!-- F3 -->
+      <rect x="360" y="365" width="52" height="13" rx="4"/><rect x="500" y="365" width="52" height="13" rx="4"/><rect x="430" y="467" width="52" height="13" rx="4"/>
+      <!-- F4 top quay edge (wider spread, longest finger) -->
+      <rect x="360" y="530" width="52" height="13" rx="4"/><rect x="520" y="530" width="52" height="13" rx="4"/><rect x="670" y="530" width="52" height="13" rx="4"/>
+    </g>
+    <g font-size="9" font-weight="700" fill="#3a2f00" text-anchor="middle">
+      <text x="386" y="45">B1</text><text x="526" y="45">B2</text><text x="456" y="147">B3</text>
+      <text x="386" y="210">B4</text><text x="526" y="210">B5</text><text x="456" y="312">B6</text>
+      <text x="386" y="375">B7</text><text x="526" y="375">B8</text><text x="456" y="477">B9</text>
+      <text x="386" y="540">B10</text><text x="546" y="540">B11</text><text x="696" y="540">B12</text>
+    </g>
+  </g>
+
+  <!-- ============ finger + basin + zone labels ============ -->
+  <g font-size="19" font-weight="800" fill="#eaf3f8" text-anchor="middle">
+    <text x="470" y="112">F1</text>
+    <text x="470" y="277">F2</text>
+    <text x="470" y="442">F3</text>
+    <text x="500" y="600">F4</text>
+  </g>
+  <g font-size="12" font-weight="700" fill="#2a6076" text-anchor="middle">
+    <text x="470" y="177">BASIN 1</text>
+    <text x="470" y="342">BASIN 2</text>
+    <text x="480" y="507">BASIN 3</text>
+  </g>
+  <text x="31" y="300" font-size="10.5" font-weight="700" fill="#0d3a4a" text-anchor="middle" transform="rotate(-90 31 300)">INLAND PLATFORM (yard + gates)</text>
+
+  <!-- F4 pentagon vertex ticks -->
+  <g fill="#bfe0ee"><circle cx="300" cy="525" r="3.2"/><circle cx="760" cy="525" r="3.2"/><circle cx="760" cy="590" r="3.2"/><circle cx="560" cy="665" r="3.2"/><circle cx="300" cy="635" r="3.2"/></g>
+  <g font-size="9.5" fill="#0d3a4a" font-weight="700">
+    <text x="286" y="521" text-anchor="end">P1</text><text x="748" y="521" text-anchor="end">P2</text>
+    <text x="766" y="592">P3</text><text x="575" y="662">P4</text><text x="292" y="648" text-anchor="end">P5</text>
+    <text x="610" y="652" font-size="9">apex — right of centre</text>
+  </g>
+
+  <!-- reach guide -->
+  <line x1="620" y1="34" x2="620" y2="476" stroke="#7fa0b8" stroke-width="1" stroke-dasharray="3 4"/>
+  <text x="628" y="250" font-size="10.5" fill="#3f6076" text-anchor="middle" transform="rotate(-90 628 250)">F1–F3 equal reach · F4 longest</text>
+
+  <!-- title + legend -->
+  <text x="20" y="22" font-size="15" font-weight="700" fill="#0d3a4a">INT-2 layout scaffold — 4-finger comb · F4 pentagon · yard+AGV+gates+berths (placeholders, real IDs)</text>
+  <g font-size="11.5" fill="#28455a">
+    <rect x="20" y="676" width="15" height="12" fill="#1f6f8b"/><text x="40" y="686">land / finger</text>
+    <rect x="120" y="676" width="15" height="12" fill="#e6eef5" stroke="#9fb4c6"/><text x="140" y="686">water / basin</text>
+    <rect x="228" y="676" width="15" height="12" fill="#e07a1f"/><text x="248" y="686">yard block · gate</text>
+    <rect x="360" y="678" width="15" height="9" fill="#2f9e44"/><text x="380" y="686">AGV lane</text>
+    <rect x="452" y="678" width="15" height="9" fill="#f2d024"/><text x="472" y="686">berth / crane (B1–B12)</text>
+    <text x="640" y="686" fill="#4a6377">placeholders — final build reuses repo components</text>
+  </g>
+</svg>

@@ -1,0 +1,188 @@
+<!doctype html>
+<!-- TEMPORARY SCAFFOLDING — INT-2 spatial feasibility sketch v2 (D-59).
+     Footprint follows the owner's Tuas reference silhouette: four-finger comb
+     opening EAST, three basins, inland platform west, tapered SE boundary.
+     Not part of the app. Delete after the footprint is approved. -->
+<html>
+<head>
+<meta charset="utf-8" />
+<title>INT-2 spatial sketch v2</title>
+<style>
+  body { margin: 0; background: #0b1220; overflow: hidden; font-family: system-ui, sans-serif; }
+  #hud { position: fixed; top: 10px; left: 10px; z-index: 10; display: flex; gap: 8px; }
+  button { padding: 6px 12px; border-radius: 6px; border: 1px solid #334; background: #1e293b; color: #e2e8f0; cursor: pointer; font-size: 13px; }
+  button.on { background: #2a78d6; border-color: #2a78d6; }
+</style>
+<script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js" } }</script>
+</head>
+<body>
+<div id="hud">
+  <button id="top" class="on">Top-down (coordinate sketch)</button>
+  <button id="persp">Strategic camera</button>
+</div>
+<script type="module">
+import * as THREE from "three";
+
+// ---- Proposed footprint constants (under review) --------------------------
+// Frame: X east(+), Z north(-). Comb opens EAST; inland platform on the WEST.
+const PLATFORM = { x0: -48, x1: -14, z0: -44, z1: 40 };  // inland reclaimed platform
+const ROOT_X = -14;                                       // finger root line (quay spine)
+// Finger bands (z) and tips (x). 4 fingers + 3 basins fill z -44..40.
+const FINGERS = [
+  { id: "F1", z0: -44, z1: -30, tip: 10, shape: "rect" },
+  { id: "F2", z0: -20, z1: -7,  tip: 8,  shape: "chamferSE" }, // SE tip cut, per reference
+  { id: "F3", z0: 3,   z1: 16,  tip: 14, shape: "rect" },
+  { id: "F4", z0: 26,  z1: 40,  tip: 22, shape: "taperSE" },   // long tapered SE boundary
+];
+const BASINS = [
+  { id: "Basin 1", z0: -30, z1: -20 },
+  { id: "Basin 2", z0: -7,  z1: 3 },
+  { id: "Basin 3", z0: 16,  z1: 26 },
+];
+const ANCH = { x0: 26, x1: 48, z0: -36, z1: -8 };         // offshore east, beyond tips
+const GATE = { x: -40, z: 36, w: 10, d: 5 };
+const AGV_SPINE_X = -17;                                   // N-S road between yard and quay
+const YARD_COLS = [-41, -25];                              // block centre x (12 wide)
+const YARD_ROWS = [-33, -13, 7, 27];                       // block centre z (9 deep)
+const BLOCK = { w: 12, d: 9 };
+// col east (near quay): YB-A..D top→bottom; col west: YB-E..H (YB-H far SW = hazmat)
+const YARD_IDS = [["YB-A","YB-B","YB-C","YB-D"],["YB-E","YB-F","YB-G","YB-H"]];
+// Berths: 3 per finger, IDs preserved (fi = floor((n-1)/3)). local 0/1 = north
+// face inner/outer, local 2 = south face mid. Berth length 11.
+const BERTHS = {
+  B1:{f:0,face:"N",x:-13}, B2:{f:0,face:"N",x:-1}, B3:{f:0,face:"S",x:-8},
+  B4:{f:1,face:"N",x:-13}, B5:{f:1,face:"N",x:-3}, B6:{f:1,face:"S",x:-10},
+  B7:{f:2,face:"N",x:-13}, B8:{f:2,face:"N",x:-1}, B9:{f:2,face:"S",x:-8},
+  B10:{f:3,face:"N",x:-13}, B11:{f:3,face:"N",x:-1}, B12:{f:3,face:"S",x:-12},
+};
+const BERTH_LEN = 11;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color("#0b1220");
+scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+const sun = new THREE.DirectionalLight(0xffffff, 0.8); sun.position.set(30, 60, 20); scene.add(sun);
+const flat = (color, opacity = 1) => new THREE.MeshLambertMaterial({ color, transparent: opacity < 1, opacity });
+
+function poly(points, y, mat, extrude = 0) { // points: [x, z][]
+  const s = new THREE.Shape();
+  points.forEach(([x, z], k) => (k ? s.lineTo(x, -z) : s.moveTo(x, -z)));
+  s.closePath();
+  const geo = extrude
+    ? new THREE.ExtrudeGeometry(s, { depth: extrude, bevelEnabled: false })
+    : new THREE.ShapeGeometry(s);
+  const m = new THREE.Mesh(geo, mat);
+  m.rotation.x = -Math.PI / 2; m.position.y = y;
+  scene.add(m);
+  if (extrude) {
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: 0xe2e8f0 }));
+    e.rotation.x = -Math.PI / 2; e.position.y = y; scene.add(e);
+  }
+  return m;
+}
+function box(x, z, w, d, h, mat, baseY = 0) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x, baseY + h / 2, z); scene.add(m); return m;
+}
+const LAND_TOP = 1.1; // items on the platform/fingers sit on the extruded land
+function label(text, x, z, size = 3.2, color = "#ffffff") {
+  const c = document.createElement("canvas"); c.width = 256; c.height = 64;
+  const g = c.getContext("2d");
+  g.fillStyle = "rgba(10,16,28,0.75)"; g.fillRect(0, 0, 256, 64);
+  g.fillStyle = color; g.font = "bold 40px system-ui"; g.textAlign = "center"; g.textBaseline = "middle";
+  g.fillText(text, 128, 34);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false }));
+  s.scale.set(size * 2.2, size * 0.55 * 2.2, 1); s.position.set(x, 2.5, z); scene.add(s);
+}
+
+// Water everywhere
+box(0, -2, 110, 100, 0.02, flat("#16324f"));
+
+// 1 main reclaimed platform polygon
+poly([[PLATFORM.x0, PLATFORM.z0], [PLATFORM.x1, PLATFORM.z0], [PLATFORM.x1, PLATFORM.z1], [PLATFORM.x0, PLATFORM.z1]], 0, flat("#aab2bf"), 1.0);
+
+// 4 connected finger polygons (attached at ROOT_X)
+function fingerPoints(f) {
+  if (f.shape === "chamferSE") {
+    const cut = 5;
+    return [[ROOT_X, f.z0], [f.tip, f.z0], [f.tip, f.z1 - cut], [f.tip - cut, f.z1], [ROOT_X, f.z1]];
+  }
+  if (f.shape === "taperSE") { // long diagonal outer boundary on the south-east
+    return [[ROOT_X, f.z0], [f.tip, f.z0], [10, f.z1], [ROOT_X, f.z1]];
+  }
+  return [[ROOT_X, f.z0], [f.tip, f.z0], [f.tip, f.z1], [ROOT_X, f.z1]];
+}
+FINGERS.forEach((f) => {
+  poly(fingerPoints(f), 0, flat("#8d96a6"), 1.1);
+  label(f.id, (ROOT_X + f.tip) / 2, (f.z0 + f.z1) / 2, 3.4, "#ffd166");
+});
+
+// 3 basins (negative space) — outlined + labelled so the count is explicit
+BASINS.forEach((b) => {
+  poly([[ROOT_X, b.z0], [24, b.z0], [24, b.z1], [ROOT_X, b.z1]], 0.04, flat("#1d4468", 0.5));
+  label(b.id, 6, (b.z0 + b.z1) / 2, 2.6, "#93c5fd");
+});
+
+// Berth strips + sample vessels (alongside = long axis E-W)
+const berthColor = { N: "#1baf7a", S: "#eda100" };
+Object.entries(BERTHS).forEach(([id, b]) => {
+  const f = FINGERS[b.f];
+  const z = b.face === "N" ? f.z0 : f.z1;
+  const cx = b.x + BERTH_LEN / 2;
+  box(cx, z, BERTH_LEN, 0.8, 1.3, flat(berthColor[b.face]), LAND_TOP);
+  label(id, cx, z + (b.face === "N" ? -2.4 : 2.4), 2.2, "#7dd3fc");
+  if (id === "B2" || id === "B6" || id === "B12") {
+    box(cx, z + (b.face === "N" ? -2.8 : 2.8), 10, 2.4, 1.6, flat("#2a78d6"));
+  }
+});
+
+// Inland yard: 8 blocks, 2 cols x 4 rows on the platform
+YARD_IDS.forEach((col, ci) => col.forEach((id, ri) => {
+  const x = YARD_COLS[ci === 0 ? 1 : 0]; // YB-A..D east col (near quay), YB-E..H west col
+  const z = YARD_ROWS[ri];
+  const isReefer = id === "YB-A" || id === "YB-B";
+  box(ci === 0 ? YARD_COLS[1] : YARD_COLS[0], z, BLOCK.w, BLOCK.d, 1, flat(isReefer ? "#1baf7a" : id === "YB-H" ? "#eda100" : "#3987e5", 0.95), LAND_TOP);
+  label(id, ci === 0 ? YARD_COLS[1] : YARD_COLS[0], z, 2.6);
+}));
+label("INLAND YARD", -33, -42, 3.2, "#a7f3d0");
+
+// AGV corridors: N-S spine, quay stubs into each finger root, yard aisles per row
+const road = flat("#f2c14e");
+box(AGV_SPINE_X, (PLATFORM.z0 + PLATFORM.z1) / 2, 1.4, PLATFORM.z1 - PLATFORM.z0 - 4, 0.18, road, LAND_TOP);
+FINGERS.forEach((f) => box((AGV_SPINE_X + ROOT_X + 4) / 2 + 2, (f.z0 + f.z1) / 2, 8 + 3, 1.4, 0.18, road, LAND_TOP));
+YARD_ROWS.forEach((z) => box((AGV_SPINE_X + PLATFORM.x0) / 2, z + BLOCK.d / 2 + 1.2, PLATFORM.x1 - PLATFORM.x0 - 3, 1.4, 0.18, road, LAND_TOP));
+label("AGV SPINE", AGV_SPINE_X, -46.5, 2.6, "#f2c14e");
+
+// Anchorage offshore east + gate on the platform SW
+poly([[ANCH.x0, ANCH.z0], [ANCH.x1, ANCH.z0], [ANCH.x1, ANCH.z1], [ANCH.x0, ANCH.z1]], 0.05, flat("#eda100", 0.22));
+for (let r = 0; r < 6; r++) {
+  const x = 31 + (r % 3) * 7, z = -31 + Math.floor(r / 3) * 8;
+  box(x, z, 0.9, 0.9, 0.3, flat("#eda100"));
+  if (r < 2) box(x, z, 9, 2.2, 1.4, flat("#eda100"));
+}
+label("ANCHORAGE", 37, -22, 3.2, "#fbbf24");
+label("APPROACH ↓", 37, -42, 2.8, "#93c5fd");
+box(GATE.x, GATE.z, GATE.w, GATE.d, 1.2, flat("#64748b"), LAND_TOP);
+label("GATE", GATE.x, GATE.z, 2.6);
+
+// ---- Cameras ----
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const persp = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.5, 400);
+persp.position.set(64, 52, 44); persp.lookAt(-14, 0, -4);
+const aspect = innerWidth / innerHeight;
+const half = 52;
+const ortho = new THREE.OrthographicCamera(-half * aspect, half * aspect, half, -half, 0.1, 300);
+ortho.position.set(0, 120, -2); ortho.up.set(0, 0, -1); ortho.lookAt(0, 0, -2);
+
+let cam = ortho;
+const bTop = document.getElementById("top"), bPersp = document.getElementById("persp");
+bTop.onclick = () => { cam = ortho; bTop.className = "on"; bPersp.className = ""; renderer.render(scene, cam); };
+bPersp.onclick = () => { cam = persp; bPersp.className = "on"; bTop.className = ""; renderer.render(scene, cam); };
+(function loop() { requestAnimationFrame(loop); renderer.render(scene, cam); })();
+// Explicit render hook — rAF is throttled/paused in hidden panes, so captures use this.
+window.renderCam = (name) => { cam = name === "persp" ? persp : ortho; renderer.render(scene, cam); return name; };
+</script>
+</body>
+</html>
